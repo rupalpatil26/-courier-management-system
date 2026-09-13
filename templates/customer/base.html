@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Customer Portal{% endblock %} - {{ system.name | default('Courier Management System') }}</title>
+  {% include 'partials/header.html' %}
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #38bdf8;
+      --primary-hover: #0284c7;
+      --accent: #6366f1;
+      --dark-bg: #0b132b;
+      --card-bg: rgba(26, 38, 57, 0.75);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text-muted: #94a3b8;
+    }
+    body.customer-body {
+      background-color: #080d1a !important;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
+      color: #f1f5f9;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .customer-navbar {
+      background: rgba(15, 23, 42, 0.85) !important;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 0.75rem 1.5rem;
+    }
+    .customer-nav-link {
+      color: #94a3b8 !important;
+      font-weight: 500;
+      font-size: 0.95rem;
+      padding: 0.5rem 1rem !important;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .customer-nav-link:hover, .customer-nav-link.active {
+      color: #38bdf8 !important;
+      background: rgba(56, 189, 248, 0.1);
+    }
+    .glass-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .metric-card {
+      padding: 1.5rem;
+      border-radius: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+    .metric-card::after {
+      content: '';
+      position: absolute;
+      top: -20px;
+      right: -20px;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(56,189,248,0.15) 0%, transparent 70%);
+    }
+    .btn-gradient-primary {
+      background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);
+      border: none;
+      color: #ffffff !important;
+      font-weight: 600;
+      border-radius: 8px;
+      padding: 0.6rem 1.4rem;
+      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
+      transition: all 0.2s ease;
+    }
+    .btn-gradient-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(2, 132, 199, 0.5);
+    }
+    .badge-status {
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+    .badge-delivered { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); }
+    .badge-transit { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+    .badge-pending { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .badge-failed { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+    .table-dark-custom {
+      color: #f1f5f9;
+      background: transparent;
+    }
+    .table-dark-custom th {
+      background: rgba(15, 23, 42, 0.6);
+      color: #94a3b8;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      padding: 0.85rem 1rem;
+    }
+    .table-dark-custom td {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 1rem;
+      vertical-align: middle;
+    }
+    .notif-badge {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background: #ef4444;
+      color: white;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body class="customer-body">
+
+  <!-- Customer Portal Navbar -->
+  <nav class="navbar navbar-expand-lg customer-navbar sticky-top">
+    <div class="container-fluid max-w-7xl">
+      <a class="navbar-brand d-flex align-items-center gap-2 text-white font-weight-bold" href="{{ url_for('customer.dashboard') }}">
+        <div style="width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(135deg, #0284c7, #38bdf8); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(56,189,248,0.3);">
+          <i class="fas fa-shipping-fast text-white"></i>
+        </div>
+        <span class="ml-2 font-weight-bold" style="letter-spacing: -0.3px;">{{ system.name | default('Courier CMS') }} <span class="badge badge-info ml-1" style="font-size: 0.7rem; background: rgba(56,189,248,0.2); color: #38bdf8; border: 1px solid rgba(56,189,248,0.4);">CLIENT</span></span>
+      </a>
+
+      <button class="navbar-toggler text-white border-0" type="button" data-toggle="collapse" data-target="#customerNav">
+        <i class="fas fa-bars"></i>
+      </button>
+
+      <div class="collapse navbar-collapse" id="customerNav">
+        <ul class="navbar-nav mx-auto">
+          <li class="nav-item">
+            <a class="nav-link customer-nav-link {% if request.endpoint == 'customer.dashboard' %}active{% endif %}" href="{{ url_for('customer.dashboard') }}">
+              <i class="fas fa-th-large"></i> Dashboard
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link customer-nav-link {% if request.endpoint == 'customer.book_parcel' %}active{% endif %}" href="{{ url_for('customer.book_parcel') }}">
+              <i class="fas fa-box-open"></i> Book Parcel
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link customer-nav-link {% if request.endpoint == 'customer.parcels' %}active{% endif %}" href="{{ url_for('customer.parcels') }}">
+              <i class="fas fa-boxes"></i> My Parcels
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link customer-nav-link {% if request.endpoint == 'customer.invoices' %}active{% endif %}" href="{{ url_for('customer.invoices') }}">
+              <i class="fas fa-file-invoice-dollar"></i> Invoices
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link customer-nav-link" href="/#track">
+              <i class="fas fa-search-location"></i> Live Track
+            </a>
+          </li>
+        </ul>
+
+        <ul class="navbar-nav align-items-center gap-2">
+          <!-- Notification Bell -->
+          <li class="nav-item mr-3 position-relative">
+            <a href="{{ url_for('customer.notifications') }}" class="btn btn-dark rounded-circle position-relative" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);">
+              <i class="fas fa-bell text-info"></i>
+              {% if unread_notifications_count and unread_notifications_count > 0 %}
+              <span class="notif-badge">{{ unread_notifications_count }}</span>
+              {% endif %}
+            </a>
+          </li>
+
+          <!-- User Menu -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle text-white d-flex align-items-center gap-2" href="#" id="userMenu" data-toggle="dropdown">
+              <div style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #4f46e5, #06b6d4); display: flex; align-items: center; justify-content: center; font-weight: 700;">
+                {{ session.get('login_name', 'User')[0]|upper }}
+              </div>
+              <span class="ml-2 font-weight-medium">{{ session.get('login_name', 'Customer') }}</span>
+            </a>
+            <div class="dropdown-menu dropdown-menu-right" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+              <a class="dropdown-item text-light py-2" href="{{ url_for('customer.profile') }}">
+                <i class="fas fa-user-circle mr-2 text-info"></i> My Profile
+              </a>
+              <a class="dropdown-item text-light py-2" href="{{ url_for('customer.invoices') }}">
+                <i class="fas fa-receipt mr-2 text-warning"></i> My Billing
+              </a>
+              <div class="dropdown-divider" style="border-color: rgba(255,255,255,0.08);"></div>
+              <a class="dropdown-item text-danger py-2" href="/api/auth/logout">
+                <i class="fas fa-sign-out-alt mr-2"></i> Log Out
+              </a>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Flash Messages -->
+  <div class="container mt-3">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show glass-card" style="border-left: 4px solid var(--primary);" role="alert">
+            <i class="fas fa-info-circle mr-2"></i> {{ message }}
+            <button type="button" class="close text-white" data-dismiss="alert">&times;</button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
+
+  <!-- Main Content Body -->
+  <main class="flex-grow-1 py-4">
+    <div class="container">
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+
+  <!-- Universal Modal for Customer actions -->
+  <div class="modal fade" id="customer_modal" role="dialog">
+    <div class="modal-dialog modal-md" role="document">
+      <div class="modal-content" style="background: #1e293b; color: #f8fafc; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;">
+        <div class="modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.08);">
+          <h5 class="modal-title font-weight-bold"></h5>
+          <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+        </div>
+        <div class="modal-body"></div>
+        <div class="modal-footer" style="border-top: 1px solid rgba(255,255,255,0.08);">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="py-3 text-center text-muted" style="border-top: 1px solid rgba(255,255,255,0.05); font-size: 0.85rem;">
+    &copy; 2026 {{ system.name | default('Courier Management System') }}. All rights reserved.
+  </footer>
+
+  {% include 'partials/footer.html' %}
+  <script>
+    window.customer_modal = function(title = '', url = '', size = ''){
+      start_load();
+      $.ajax({
+        url: url,
+        error: function(err){
+          console.log(err);
+          alert("An error occurred");
+          end_load();
+        },
+        success: function(resp){
+          if(resp){
+            $('#customer_modal .modal-title').html(title);
+            $('#customer_modal .modal-body').html(resp);
+            if(size != ''){
+              $('#customer_modal .modal-dialog').addClass(size);
+            } else {
+              $('#customer_modal .modal-dialog').removeAttr("class").addClass("modal-dialog modal-md");
+            }
+            $('#customer_modal').modal('show');
+            end_load();
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>

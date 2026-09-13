@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+{% include 'partials/header.html' %}
+<body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed layout-footer-fixed dark-mode">
+<div class="wrapper">
+  {% include 'partials/topbar.html' %}
+  {% include 'partials/sidebar.html' %}
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <div class="toast" id="alert_toast" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-body text-white"></div>
+    </div>
+    <div id="toastsContainerTopRight" class="toasts-top-right fixed"></div>
+    
+    <!-- Content Header (Page header) -->
+    <div class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1 class="m-0 text-white font-weight-bold">{{ page | replace('_', ' ') | title }}</h1>
+          </div>
+        </div>
+        <hr style="border-top: 1px solid rgba(255,255,255,0.08); margin-top: 0.5rem; margin-bottom: 1.25rem;">
+      </div>
+    </div>
+    <!-- /.content-header -->
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+        {% if page == 'home' %}
+          {% include 'pages/home.html' %}
+        {% elif page == 'branch_list' %}
+          {% include 'pages/branch_list.html' %}
+        {% elif page in ('new_branch', 'edit_branch') %}
+          {% include 'pages/new_branch.html' %}
+        {% elif page == 'parcel_list' %}
+          {% include 'pages/parcel_list.html' %}
+        {% elif page == 'view_parcel' %}
+          {% include 'pages/view_parcel.html' %}
+        {% elif page in ('new_parcel', 'edit_parcel') %}
+          {% include 'pages/new_parcel.html' %}
+        {% elif page == 'staff_list' %}
+          {% include 'pages/staff_list.html' %}
+        {% elif page in ('new_staff', 'edit_staff') %}
+          {% include 'pages/new_staff.html' %}
+        {% elif page == 'user_list' %}
+          {% include 'pages/user_list.html' %}
+        {% elif page in ('new_user', 'edit_user') %}
+          {% include 'pages/new_user.html' %}
+        {% elif page == 'track' %}
+          {% include 'pages/track.html' %}
+        {% elif page == 'reports' %}
+          {% include 'pages/reports.html' %}
+        {% elif page == 'system_settings' %}
+          {% include 'pages/system_settings.html' %}
+        {% else %}
+          {% include '404.html' %}
+        {% endif %}
+      </div>
+    </section>
+    <!-- /.content -->
+
+    <div class="modal fade" id="confirm_modal" role="dialog">
+      <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Confirmation</h5>
+          </div>
+          <div class="modal-body">
+            <div id="delete_content"></div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="confirm" onclick="">Continue</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="uni_modal" role="dialog">
+      <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title"></h5>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="submit" onclick="$('#uni_modal form').submit()">Save</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="uni_modal_right" role="dialog">
+      <div class="modal-dialog modal-full-height modal-md" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title"></h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span class="fa fa-arrow-right"></span>
+            </button>
+          </div>
+          <div class="modal-body"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="viewer_modal" role="dialog">
+      <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+          <button type="button" class="btn-close" data-dismiss="modal"><span class="fa fa-times"></span></button>
+          <img src="" alt="">
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <!-- /.content-wrapper -->
+
+  <footer class="main-footer">
+    <strong>Copyright &copy; 2026 <a href="/">{{ system.name | default('Courier Management System') }}</a>.</strong>
+    All rights reserved.
+    <div class="float-right d-none d-sm-inline-block">
+      <b>Python Flask Edition</b>
+    </div>
+  </footer>
+</div>
+
+{% include 'partials/footer.html' %}
+</body>
+</html>

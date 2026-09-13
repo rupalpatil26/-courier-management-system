@@ -1,0 +1,459 @@
+<!-- Chart.js Bundle -->
+<script src="/assets/plugins/chart.js/Chart.bundle.min.js"></script>
+
+<div class="col-lg-12">
+  <!-- Page Header & Action Buttons -->
+  <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
+    <div>
+      <h3 class="font-weight-bold text-white m-0"><i class="fas fa-chart-line text-info mr-2"></i> Advanced Analytics & Reports</h3>
+      <p class="text-muted m-0 small">Real-time performance intelligence, freight volumes, branch analytics and revenue trends.</p>
+    </div>
+    <div class="d-flex gap-2">
+      <button type="button" class="btn btn-outline-info btn-sm font-weight-bold" id="btnExportCsv">
+        <i class="fas fa-file-csv mr-1"></i> Export CSV
+      </button>
+      <button type="button" class="btn btn-outline-light btn-sm font-weight-bold" id="print">
+        <i class="fas fa-print mr-1"></i> Print Report
+      </button>
+    </div>
+  </div>
+
+  <!-- KPI Summary Cards -->
+  <div class="row mb-3">
+    <div class="col-md-2 col-sm-4 col-6 mb-2">
+      <div class="card bg-dark border-0 p-3 text-center" style="background: rgba(30, 41, 59, 0.7); border-radius: 12px; border: 1px solid rgba(255,255,255,0.08) !important;">
+        <span class="text-muted small text-uppercase font-weight-bold">Total Parcels</span>
+        <h3 class="text-white font-weight-bold mt-1 mb-0" id="kpiTotal">{{ analytics.summary.total_parcels }}</h3>
+      </div>
+    </div>
+    <div class="col-md-2 col-sm-4 col-6 mb-2">
+      <div class="card bg-dark border-0 p-3 text-center" style="background: rgba(30, 41, 59, 0.7); border-radius: 12px; border: 1px solid rgba(255,255,255,0.08) !important;">
+        <span class="text-muted small text-uppercase font-weight-bold">Delivered</span>
+        <h3 class="text-success font-weight-bold mt-1 mb-0" id="kpiDelivered">{{ analytics.summary.delivered_count }}</h3>
+      </div>
+    </div>
+    <div class="col-md-3 col-sm-4 col-6 mb-2">
+      <div class="card bg-dark border-0 p-3 text-center" style="background: rgba(30, 41, 59, 0.7); border-radius: 12px; border: 1px solid rgba(255,255,255,0.08) !important;">
+        <span class="text-muted small text-uppercase font-weight-bold">Total Revenue</span>
+        <h3 class="text-info font-weight-bold mt-1 mb-0" id="kpiRevenue">${{ "{:,.2f}".format(analytics.summary.total_revenue) }}</h3>
+      </div>
+    </div>
+    <div class="col-md-2 col-sm-6 col-6 mb-2">
+      <div class="card bg-dark border-0 p-3 text-center" style="background: rgba(30, 41, 59, 0.7); border-radius: 12px; border: 1px solid rgba(255,255,255,0.08) !important;">
+        <span class="text-muted small text-uppercase font-weight-bold">Success Rate</span>
+        <h3 class="text-warning font-weight-bold mt-1 mb-0" id="kpiSuccess">{{ analytics.summary.success_rate }}%</h3>
+      </div>
+    </div>
+    <div class="col-md-3 col-sm-6 col-12 mb-2">
+      <div class="card bg-dark border-0 p-3 text-center" style="background: rgba(30, 41, 59, 0.7); border-radius: 12px; border: 1px solid rgba(255,255,255,0.08) !important;">
+        <span class="text-muted small text-uppercase font-weight-bold">Avg Client Rating</span>
+        <h3 class="text-warning font-weight-bold mt-1 mb-0" id="kpiRating"><i class="fas fa-star text-warning small mr-1"></i>{{ analytics.summary.avg_rating }} / 5.0</h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- Multi-Dimension Filter Bar -->
+  <div class="card card-outline card-primary mb-4" style="background: rgba(15, 23, 42, 0.85); border-radius: 12px; border: 1px solid rgba(255,255,255,0.08);">
+    <div class="card-body py-3">
+      <div class="row align-items-end">
+        <div class="col-lg-2 col-md-4 col-sm-6 mb-2">
+          <label class="text-muted small font-weight-bold">From Date</label>
+          <input type="date" id="date_from" class="form-control form-control-sm" style="background: #1e293b; color: white; border-color: rgba(255,255,255,0.1);">
+        </div>
+        <div class="col-lg-2 col-md-4 col-sm-6 mb-2">
+          <label class="text-muted small font-weight-bold">To Date</label>
+          <input type="date" id="date_to" class="form-control form-control-sm" style="background: #1e293b; color: white; border-color: rgba(255,255,255,0.1);">
+        </div>
+        <div class="col-lg-2 col-md-4 col-sm-6 mb-2">
+          <label class="text-muted small font-weight-bold">Status</label>
+          <select id="status" class="form-control form-control-sm" style="background: #1e293b; color: white; border-color: rgba(255,255,255,0.1);">
+            <option value="all" selected>All Statuses</option>
+            {% for st in status_list %}
+            <option value="{{ loop.index0 }}">{{ st }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-lg-2 col-md-4 col-sm-6 mb-2">
+          <label class="text-muted small font-weight-bold">Branch</label>
+          <select id="branch_filter" class="form-control form-control-sm" style="background: #1e293b; color: white; border-color: rgba(255,255,255,0.1);">
+            <option value="all" selected>All Branches</option>
+            {% if branches %}
+              {% for b in branches %}
+              <option value="{{ b.id }}">{{ b.branch_code }} ({{ b.city }})</option>
+              {% endfor %}
+            {% endif %}
+          </select>
+        </div>
+        <div class="col-lg-2 col-md-4 col-sm-6 mb-2">
+          <label class="text-muted small font-weight-bold">Delivery Staff</label>
+          <select id="staff_filter" class="form-control form-control-sm" style="background: #1e293b; color: white; border-color: rgba(255,255,255,0.1);">
+            <option value="all" selected>All Personnel</option>
+            {% if staff_list %}
+              {% for s in staff_list %}
+              <option value="{{ s.id }}">{{ s.name }}</option>
+              {% endfor %}
+            {% endif %}
+          </select>
+        </div>
+        <div class="col-lg-2 col-md-4 col-sm-12 mb-2">
+          <button class="btn btn-sm btn-primary btn-block font-weight-bold" type="button" id="view_report" style="background: linear-gradient(135deg, #0284c7, #38bdf8); border: none;">
+            <i class="fas fa-filter mr-1"></i> Apply Filters
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6 Interactive Chart.js Visualizations (2x3 Grid) -->
+  <div class="row mb-4">
+    <!-- Chart 1: Shipment Volume Trends -->
+    <div class="col-lg-4 col-md-6 mb-4">
+      <div class="card bg-dark border-0 p-3 h-100" style="background: rgba(30, 41, 59, 0.7); border-radius: 12px; border: 1px solid rgba(255,255,255,0.08) !important;">
+        <h6 class="font-weight-bold text-info mb-2"><i class="fas fa-chart-area mr-1"></i> 1. Shipment Volume Trends</h6>
+        <div style="position: relative; height: 210px;">
+          <canvas id="chartShipmentTrends"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chart 2: Status Breakdown -->
+    <div class="col-lg-4 col-md-6 mb-4">
+      <div class="card bg-dark border-0 p-3 h-100" style="background: rgba(30, 41, 59, 0.7); border-radius: 12px; border: 1px solid rgba(255,255,255,0.08) !important;">
+        <h6 class="font-weight-bold text-success mb-2"><i class="fas fa-chart-pie mr-1"></i> 2. Parcel Status Distribution</h6>
+        <div style="position: relative; height: 210px;">
+          <canvas id="chartStatusBreakdown"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chart 3: Branch Volumes -->
+    <div class="col-lg-4 col-md-6 mb-4">
+      <div class="card bg-dark border-0 p-3 h-100" style="background: rgba(30, 41, 59, 0.7); border-radius: 12px; border: 1px solid rgba(255,255,255,0.08) !important;">
+        <h6 class="font-weight-bold text-warning mb-2"><i class="fas fa-building mr-1"></i> 3. Branch Shipments Volume</h6>
+        <div style="position: relative; height: 210px;">
+          <canvas id="chartBranchVolume"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chart 4: Delivery Success vs Failed Outcomes -->
+    <div class="col-lg-4 col-md-6 mb-4">
+      <div class="card bg-dark border-0 p-3 h-100" style="background: rgba(30, 41, 59, 0.7); border-radius: 12px; border: 1px solid rgba(255,255,255,0.08) !important;">
+        <h6 class="font-weight-bold text-primary mb-2"><i class="fas fa-check-double mr-1"></i> 4. Delivery Outcomes</h6>
+        <div style="position: relative; height: 210px;">
+          <canvas id="chartDeliveryOutcomes"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chart 5: Revenue Trends -->
+    <div class="col-lg-4 col-md-6 mb-4">
+      <div class="card bg-dark border-0 p-3 h-100" style="background: rgba(30, 41, 59, 0.7); border-radius: 12px; border: 1px solid rgba(255,255,255,0.08) !important;">
+        <h6 class="font-weight-bold text-info mb-2"><i class="fas fa-dollar-sign mr-1"></i> 5. Revenue Trends ($)</h6>
+        <div style="position: relative; height: 210px;">
+          <canvas id="chartRevenueTrends"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chart 6: Staff Delivery Performance -->
+    <div class="col-lg-4 col-md-6 mb-4">
+      <div class="card bg-dark border-0 p-3 h-100" style="background: rgba(30, 41, 59, 0.7); border-radius: 12px; border: 1px solid rgba(255,255,255,0.08) !important;">
+        <h6 class="font-weight-bold text-success mb-2"><i class="fas fa-user-check mr-1"></i> 6. Staff Delivery Performance</h6>
+        <div style="position: relative; height: 210px;">
+          <canvas id="chartStaffPerformance"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detailed Shipment Table -->
+  <div class="card bg-dark border-0 mb-4" style="background: rgba(30, 41, 59, 0.7); border-radius: 12px; border: 1px solid rgba(255,255,255,0.08) !important;">
+    <div class="card-header border-0 d-flex justify-content-between align-items-center">
+      <h5 class="font-weight-bold text-white m-0"><i class="fas fa-table mr-2 text-info"></i> Detailed Shipment Records</h5>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-dark mb-0" id="report-list" style="background: transparent;">
+          <thead style="background: rgba(15,23,42,0.8);">
+            <tr>
+              <th>#</th>
+              <th>Date</th>
+              <th>Tracking #</th>
+              <th>Sender</th>
+              <th>Recipient</th>
+              <th>Amount ($)</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Print Details (for printable view) -->
+<noscript>
+  <style>
+    table.table{ width:100%; border-collapse: collapse; }
+    table.table tr,table.table th, table.table td{ border:1px solid #333; padding: 8px; }
+    .text-center{ text-align: center; }
+  </style>
+  <h3 class="text-center"><b>Executive Courier Performance & Shipment Report</b></h3>
+</noscript>
+<div class="details d-none">
+  <p><b>Date Range:</b> <span class="drange"></span></p>
+  <p><b>Status:</b> <span class="status-field">All</span></p>
+</div>
+
+<script>
+  let charts = {};
+
+  // Initial chart rendering with server data
+  const initialAnalytics = {{ analytics | tojson | safe }};
+
+  function initCharts(data) {
+    Chart.defaults.global.defaultFontColor = '#94a3b8';
+    Chart.defaults.global.defaultFontFamily = "'Plus Jakarta Sans', sans-serif";
+
+    // Destroy existing instances if updating
+    Object.values(charts).forEach(c => { if(c && c.destroy) c.destroy(); });
+
+    // 1. Shipment Trends (Line)
+    const ctx1 = document.getElementById('chartShipmentTrends').getContext('2d');
+    charts.trend = new Chart(ctx1, {
+      type: 'line',
+      data: {
+        labels: data.charts.trend.labels,
+        datasets: [{
+          label: 'Shipment Volume',
+          data: data.charts.trend.volumes,
+          borderColor: '#38bdf8',
+          backgroundColor: 'rgba(56, 189, 248, 0.15)',
+          fill: true,
+          tension: 0.3
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        legend: { display: false },
+        scales: {
+          yAxes: [{ gridLines: { color: 'rgba(255,255,255,0.06)' }, ticks: { beginAtZero: true, stepSize: 1 } }],
+          xAxes: [{ gridLines: { display: false } }]
+        }
+      }
+    });
+
+    // 2. Status Breakdown (Doughnut)
+    const ctx2 = document.getElementById('chartStatusBreakdown').getContext('2d');
+    charts.status = new Chart(ctx2, {
+      type: 'doughnut',
+      data: {
+        labels: data.charts.status.labels,
+        datasets: [{
+          data: data.charts.status.data,
+          backgroundColor: ['#38bdf8', '#0284c7', '#6366f1', '#a855f7', '#10b981', '#f59e0b', '#ef4444', '#14b8a6'],
+          borderColor: '#1e293b',
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        legend: { position: 'bottom', labels: { boxWidth: 10, fontSize: 10 } }
+      }
+    });
+
+    // 3. Branch Volume (Horizontal Bar)
+    const ctx3 = document.getElementById('chartBranchVolume').getContext('2d');
+    charts.branch = new Chart(ctx3, {
+      type: 'horizontalBar',
+      data: {
+        labels: data.charts.branch.labels,
+        datasets: [{
+          label: 'Outgoing Parcels',
+          data: data.charts.branch.data,
+          backgroundColor: '#f59e0b',
+          borderRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        legend: { display: false },
+        scales: {
+          xAxes: [{ gridLines: { color: 'rgba(255,255,255,0.06)' }, ticks: { beginAtZero: true, stepSize: 1 } }],
+          yAxes: [{ gridLines: { display: false } }]
+        }
+      }
+    });
+
+    // 4. Delivery Outcomes (Pie)
+    const ctx4 = document.getElementById('chartDeliveryOutcomes').getContext('2d');
+    charts.outcome = new Chart(ctx4, {
+      type: 'pie',
+      data: {
+        labels: data.charts.outcome.labels,
+        datasets: [{
+          data: data.charts.outcome.data,
+          backgroundColor: ['#22c55e', '#38bdf8', '#eab308', '#ef4444'],
+          borderColor: '#1e293b',
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        legend: { position: 'bottom', labels: { boxWidth: 10, fontSize: 10 } }
+      }
+    });
+
+    // 5. Revenue Trends (Bar)
+    const ctx5 = document.getElementById('chartRevenueTrends').getContext('2d');
+    charts.revenue = new Chart(ctx5, {
+      type: 'bar',
+      data: {
+        labels: data.charts.trend.labels,
+        datasets: [{
+          label: 'Revenue ($)',
+          data: data.charts.trend.revenues,
+          backgroundColor: '#06b6d4',
+          borderRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        legend: { display: false },
+        scales: {
+          yAxes: [{ gridLines: { color: 'rgba(255,255,255,0.06)' }, ticks: { beginAtZero: true } }],
+          xAxes: [{ gridLines: { display: false } }]
+        }
+      }
+    });
+
+    // 6. Staff Delivery Performance (Grouped Bar)
+    const ctx6 = document.getElementById('chartStaffPerformance').getContext('2d');
+    charts.staff = new Chart(ctx6, {
+      type: 'bar',
+      data: {
+        labels: data.charts.staff.labels,
+        datasets: [
+          { label: 'Completed', data: data.charts.staff.delivered, backgroundColor: '#10b981' },
+          { label: 'Assigned', data: data.charts.staff.assigned, backgroundColor: 'rgba(148, 163, 184, 0.4)' }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        legend: { position: 'top', labels: { boxWidth: 10, fontSize: 10 } },
+        scales: {
+          yAxes: [{ gridLines: { color: 'rgba(255,255,255,0.06)' }, ticks: { beginAtZero: true, stepSize: 1 } }],
+          xAxes: [{ gridLines: { display: false } }]
+        }
+      }
+    });
+  }
+
+  function loadReportData() {
+    start_load();
+    const date_from = $('#date_from').val();
+    const date_to = $('#date_to').val();
+    const status = $('#status').val();
+    const branch_id = $('#branch_filter').val();
+    const staff_id = $('#staff_filter').val();
+
+    // 1. Fetch table records via Flask API endpoint
+    $.ajax({
+      url: '/api/reports/data',
+      method: 'POST',
+      data: { status: status, date_from: date_from, date_to: date_to },
+      error: function(err) {
+        console.log(err);
+        alert_toast("An error occurred loading reports", 'error');
+        end_load();
+      },
+      success: function(resp) {
+        if(typeof resp === 'string') resp = JSON.parse(resp);
+        $('#report-list tbody').html('');
+        if(resp && resp.length > 0) {
+          resp.forEach(function(row, idx) {
+            const tr = $('<tr></tr>');
+            tr.append('<td>' + (idx + 1) + '</td>');
+            tr.append('<td>' + row.date_created + '</td>');
+            tr.append('<td><span class="text-info font-weight-bold">#' + row.reference_number + '</span></td>');
+            tr.append('<td>' + row.sender_name + '</td>');
+            tr.append('<td>' + row.recipient_name + '</td>');
+            tr.append('<td><strong class="text-success">$' + row.price + '</strong></td>');
+            tr.append('<td><span class="badge badge-info">' + row.status + '</span></td>');
+            $('#report-list tbody').append(tr);
+          });
+        } else {
+          $('#report-list tbody').html('<tr><td class="text-center py-4 text-muted" colspan="7">No shipment records found for the selected criteria.</td></tr>');
+        }
+        end_load();
+      }
+    });
+
+    // 2. Fetch updated analytics datasets for charts & KPIs
+    $.getJSON('/api/reports/analytics', {
+      date_from: date_from,
+      date_to: date_to,
+      status: status,
+      branch_id: branch_id,
+      staff_id: staff_id
+    }, function(res) {
+      if(res) {
+        $('#kpiTotal').text(res.summary.total_parcels);
+        $('#kpiDelivered').text(res.summary.delivered_count);
+        $('#kpiRevenue').text('$' + parseFloat(res.summary.total_revenue).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+        $('#kpiSuccess').text(res.summary.success_rate + '%');
+        $('#kpiRating').html('<i class="fas fa-star text-warning small mr-1"></i>' + res.summary.avg_rating + ' / 5.0');
+        initCharts(res);
+      }
+    });
+  }
+
+  $(document).ready(function() {
+    initCharts(initialAnalytics);
+    loadReportData();
+
+    $('#view_report').click(function() {
+      loadReportData();
+    });
+
+    $('#btnExportCsv').click(function() {
+      const d_from = $('#date_from').val() || '2000-01-01';
+      const d_to = $('#date_to').val() || '2099-12-31';
+      const st = $('#status').val() || 'all';
+      window.location.href = '/api/reports/export_csv?date_from=' + d_from + '&date_to=' + d_to + '&status=' + st;
+    });
+
+    $('#print').click(function() {
+      start_load();
+      const ns = $('noscript').clone();
+      const details = $('.details').clone();
+      const content = $('#report-list').clone();
+      const date_from = $('#date_from').val();
+      const date_to = $('#date_to').val();
+      const status = $('#status').val();
+
+      details.find('.drange').text(date_from ? (date_from + ' to ' + (date_to || 'Today')) : 'All Time');
+      details.find('.status-field').text($('#status option:selected').text());
+      details.removeClass('d-none');
+      ns.append(details);
+      ns.append(content);
+
+      const nw = window.open('', '', 'height=700,width=900');
+      nw.document.write(ns.html());
+      nw.document.close();
+      nw.print();
+      setTimeout(function(){
+        nw.close();
+        end_load();
+      }, 750);
+    });
+  });
+</script>

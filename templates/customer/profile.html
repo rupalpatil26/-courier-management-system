@@ -1,0 +1,116 @@
+{% extends 'customer/base.html' %}
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <h2 class="font-weight-bold text-white m-0">Customer Profile Settings ⚙️</h2>
+  <p class="text-muted m-0 mt-1">Manage your contact details, delivery address, and security credentials.</p>
+</div>
+
+<div class="glass-card p-4" style="max-width: 650px;">
+  <div id="profile-msg-area"></div>
+  <form action="{{ url_for('customer.profile') }}" method="POST" id="customer-profile-form">
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <label class="text-muted small font-weight-bold">First Name</label>
+        <input type="text" name="firstname" class="form-control" value="{{ user.firstname }}" required style="background: rgba(15,23,42,0.6); color: white; border-color: rgba(255,255,255,0.1);">
+      </div>
+      <div class="col-md-6">
+        <label class="text-muted small font-weight-bold">Last Name</label>
+        <input type="text" name="lastname" class="form-control" value="{{ user.lastname }}" required style="background: rgba(15,23,42,0.6); color: white; border-color: rgba(255,255,255,0.1);">
+      </div>
+    </div>
+
+    <div class="form-group mb-3">
+      <label class="text-muted small font-weight-bold">Email Address</label>
+      <input type="email" name="email" class="form-control" value="{{ user.email }}" required style="background: rgba(15,23,42,0.6); color: white; border-color: rgba(255,255,255,0.1);">
+    </div>
+
+    <div class="form-group mb-3">
+      <label class="text-muted small font-weight-bold">Phone / Mobile (Indian 10-digit mobile)</label>
+      <input type="text" name="phone" class="form-control" value="{{ user.phone | default('') }}" placeholder="e.g. 9876543210" style="background: rgba(15,23,42,0.6); color: white; border-color: rgba(255,255,255,0.1);">
+    </div>
+
+    <div class="form-group mb-4">
+      <label class="text-muted small font-weight-bold">Default Address</label>
+      <textarea name="address" class="form-control" rows="3" style="background: rgba(15,23,42,0.6); color: white; border-color: rgba(255,255,255,0.1);">{{ user.address | default('') }}</textarea>
+    </div>
+
+    <div class="form-group mb-4 pt-3 border-top" style="border-color: rgba(255,255,255,0.08) !important;">
+      <label class="text-muted small font-weight-bold">New Password (leave blank to keep current password)</label>
+      <input type="password" name="password" class="form-control" placeholder="••••••••" style="background: rgba(15,23,42,0.6); color: white; border-color: rgba(255,255,255,0.1);">
+    </div>
+
+    <button type="submit" class="btn btn-gradient-primary">
+      <i class="fas fa-save mr-1"></i> Save Changes
+    </button>
+  </form>
+</div>
+
+<script>
+  function validateIndianPhone(phone) {
+    if (!phone) return { valid: true };
+    phone = phone.trim();
+    if (!phone) return { valid: true };
+    if (/[a-zA-Z]/.test(phone)) return { valid: false, message: "Phone number cannot contain letters." };
+    var cleaned = phone.replace(/[\s\-\+\(\)\.]/g, '');
+    if (!/^\d+$/.test(cleaned)) return { valid: false, message: "Phone number contains invalid characters." };
+    if (cleaned.length === 12 && cleaned.startsWith('91')) cleaned = cleaned.substring(2);
+    else if (cleaned.length === 11 && cleaned.startsWith('0')) cleaned = cleaned.substring(1);
+    if (cleaned.length !== 10) return { valid: false, message: "Phone number must be a valid 10-digit mobile number." };
+    if (!/^[6-9]/.test(cleaned)) return { valid: false, message: "Phone number must start with 6, 7, 8, or 9." };
+    return { valid: true, cleaned: cleaned };
+  }
+
+  function validateEmailStr(email) {
+    if (!email) return { valid: false, message: "Email address is required." };
+    email = email.trim();
+    if (!email) return { valid: false, message: "Email address is required." };
+    if (/\s/.test(email)) return { valid: false, message: "Email address cannot contain spaces." };
+    var re = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}$/;
+    if (!re.test(email)) return { valid: false, message: "Please enter a valid email address." };
+    return { valid: true };
+  }
+
+  document.getElementById('customer-profile-form').addEventListener('submit', function(e) {
+    var alertArea = document.getElementById('profile-msg-area');
+    alertArea.innerHTML = '';
+    var inputs = this.querySelectorAll('.form-control');
+    inputs.forEach(function(inp) { inp.style.borderColor = 'rgba(255,255,255,0.1)'; });
+
+    var fn = this.querySelector('[name="firstname"]').value.trim();
+    var ln = this.querySelector('[name="lastname"]').value.trim();
+    var em = this.querySelector('[name="email"]').value.trim();
+    var ph = this.querySelector('[name="phone"]').value.trim();
+    var pwd = this.querySelector('[name="password"]').value;
+
+    var errorMsg = null;
+    var errorTarget = null;
+
+    if (!fn) { errorMsg = "First name is required."; errorTarget = '[name="firstname"]'; }
+    else if (!ln) { errorMsg = "Last name is required."; errorTarget = '[name="lastname"]'; }
+    else {
+      var emRes = validateEmailStr(em);
+      if (!emRes.valid) { errorMsg = emRes.message; errorTarget = '[name="email"]'; }
+      else if (ph) {
+        var phRes = validateIndianPhone(ph);
+        if (!phRes.valid) { errorMsg = phRes.message; errorTarget = '[name="phone"]'; }
+      }
+    }
+
+    if (!errorMsg && pwd && pwd.length < 6) {
+      errorMsg = "New password must be at least 6 characters long.";
+      errorTarget = '[name="password"]';
+    }
+
+    if (errorMsg) {
+      e.preventDefault();
+      alertArea.innerHTML = '<div class="alert alert-danger mb-3 py-2 text-center" style="border-radius: 8px; font-size: 0.9rem;"><i class="fas fa-exclamation-circle mr-1"></i> ' + errorMsg + '</div>';
+      if (errorTarget) {
+        var el = this.querySelector(errorTarget);
+        if (el) { el.style.borderColor = '#f87171'; el.focus(); }
+      }
+    }
+  });
+</script>
+{% endblock %}

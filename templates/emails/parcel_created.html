@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f172a; color: #f8fafc; margin: 0; padding: 20px; }
+  .email-container { max-width: 600px; margin: 0 auto; background: #1e293b; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; }
+  .header { background: linear-gradient(135deg, #1e3a8a, #0284c7); padding: 30px 24px; text-align: center; }
+  .header h1 { margin: 0; font-size: 24px; color: #ffffff; font-weight: 700; letter-spacing: 0.5px; }
+  .header p { margin: 8px 0 0 0; color: #bae6fd; font-size: 14px; }
+  .body { padding: 28px 24px; }
+  .badge { display: inline-block; padding: 6px 14px; background: rgba(56, 189, 248, 0.15); color: #38bdf8; border-radius: 20px; font-weight: 600; font-size: 13px; margin-bottom: 20px; }
+  .ref-box { background: rgba(15, 23, 42, 0.6); border: 1px dashed #38bdf8; border-radius: 8px; padding: 16px; text-align: center; margin: 20px 0; }
+  .ref-title { font-size: 12px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
+  .ref-num { font-size: 24px; font-weight: 700; color: #38bdf8; letter-spacing: 2px; margin-top: 4px; }
+  .details-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+  .details-table td { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 14px; }
+  .label { color: #94a3b8; width: 40%; }
+  .value { color: #f8fafc; font-weight: 600; }
+  .btn-container { text-align: center; margin-top: 28px; }
+  .btn { display: inline-block; background: #0284c7; color: #ffffff !important; text-decoration: none; padding: 12px 30px; border-radius: 6px; font-weight: 600; font-size: 14px; }
+  .footer { background: #0f172a; padding: 20px; text-align: center; font-size: 12px; color: #64748b; border-top: 1px solid rgba(255,255,255,0.05); }
+</style>
+</head>
+<body>
+<div class="email-container">
+  <div class="header">
+    <h1>Courier Management System</h1>
+    <p>Your parcel shipment has been registered</p>
+  </div>
+  <div class="body">
+    <div class="badge">Shipment Accepted</div>
+    <p>Hello <strong>{{ recipient_name or sender_name }}</strong>,</p>
+    <p>Your package has been successfully booked in our system and is being processed for dispatch.</p>
+    
+    <div class="ref-box">
+      <div class="ref-title">Tracking Number</div>
+      <div class="ref-num">{{ reference_number }}</div>
+    </div>
+
+    <table class="details-table">
+      <tr>
+        <td class="label">Sender</td>
+        <td class="value">{{ sender_name }}</td>
+      </tr>
+      <tr>
+        <td class="label">Recipient</td>
+        <td class="value">{{ recipient_name }}</td>
+      </tr>
+      <tr>
+        <td class="label">Destination</td>
+        <td class="value">{{ recipient_address }}</td>
+      </tr>
+      <tr>
+        <td class="label">Weight</td>
+        <td class="value">{{ weight }} kg</td>
+      </tr>
+      <tr>
+        <td class="label">Total Price</td>
+        <td class="value">${{ "%.2f"|format(price|float) }}</td>
+      </tr>
+    </table>
+
+    <div class="btn-container">
+      <a href="{{ tracking_url }}" class="btn">Track Your Shipment</a>
+    </div>
+  </div>
+  <div class="footer">
+    &copy; 2026 Courier Management System. All rights reserved.
+  </div>
+</div>
+</body>
+</html>

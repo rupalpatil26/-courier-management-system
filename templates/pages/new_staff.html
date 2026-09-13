@@ -1,0 +1,153 @@
+<style>
+  textarea {
+    resize: none;
+  }
+</style>
+<div class="col-lg-12">
+  <div class="card card-outline card-primary">
+    <div class="card-body">
+      <form action="" id="manage-staff">
+        <input type="hidden" name="id" value="{{ staff_member['id'] if staff_member else '' }}">
+        <input type="hidden" name="type" value="2">
+        <div class="row">
+          <div class="col-md-12">
+            <div id="msg"></div>
+
+            <div class="row">
+              <div class="col-sm-6 form-group">
+                <label class="control-label">First Name</label>
+                <input type="text" name="firstname" class="form-control form-control-sm" value="{{ staff_member['firstname'] if staff_member else '' }}" required>
+              </div>
+              <div class="col-sm-6 form-group">
+                <label class="control-label">Last Name</label>
+                <input type="text" name="lastname" class="form-control form-control-sm" value="{{ staff_member['lastname'] if staff_member else '' }}" required>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-sm-6 form-group">
+                <label class="control-label">Branch</label>
+                <select name="branch_id" class="form-control input-sm select2" required>
+                  <option value=""></option>
+                  {% for b in branches %}
+                  <option value="{{ b['id'] }}" {% if staff_member and staff_member['branch_id']|string == b['id']|string %}selected{% endif %}>
+                    {{ b['branch_code'] }} | {{ b['address'] | title }}
+                  </option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-sm-6 form-group">
+                <label class="control-label">Email</label>
+                <input type="email" name="email" class="form-control form-control-sm" value="{{ staff_member['email'] if staff_member else '' }}" required>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm-6 form-group">
+                <label class="control-label">Password</label>
+                <input type="password" name="password" class="form-control form-control-sm" {% if not staff_member %}required{% endif %}>
+                {% if staff_member %}
+                  <small><i>Leave this blank if you don't want to change this</i></small>
+                {% endif %}
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="card-footer border-top border-info">
+      <div class="d-flex w-100 justify-content-center align-items-center">
+        <button class="btn btn-flat bg-gradient-primary mx-2" form="manage-staff">Save</button>
+        <a class="btn btn-flat bg-gradient-secondary mx-2" href="/dashboard?page=staff_list">Cancel</a>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  function validateEmailStr(email) {
+    if (!email) return { valid: false, message: "Email address is required." };
+    email = email.trim();
+    if (!email) return { valid: false, message: "Email address is required." };
+    if (/\s/.test(email)) return { valid: false, message: "Email address cannot contain spaces." };
+    var re = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}$/;
+    if (!re.test(email)) return { valid: false, message: "Please enter a valid email address (e.g. user@example.com)." };
+    return { valid: true };
+  }
+
+  $('#manage-staff').submit(function(e){
+    e.preventDefault();
+    $('#msg').html('');
+    $('.form-control, .select2').removeClass('is-invalid');
+
+    var firstname = $.trim($('[name="firstname"]').val());
+    var lastname = $.trim($('[name="lastname"]').val());
+    var branch_id = $('[name="branch_id"]').val();
+    var email = $.trim($('[name="email"]').val());
+    var password = $('[name="password"]').val();
+    var isNew = !$('[name="id"]').val();
+
+    var hasError = false;
+    function markError(selector, msg) {
+      $(selector).addClass('is-invalid');
+      if (!hasError) {
+        $('#msg').html('<div class="alert alert-danger mb-3 py-2"><i class="fas fa-exclamation-circle mr-1"></i> ' + msg + '</div>');
+        $(selector).focus();
+        hasError = true;
+      }
+    }
+
+    if (!firstname) markError('[name="firstname"]', 'First name is required.');
+    if (!lastname) markError('[name="lastname"]', 'Last name is required.');
+    if (!branch_id) markError('[name="branch_id"]', 'Please select an assigned branch.');
+
+    var emVal = validateEmailStr(email);
+    if (!emVal.valid) markError('[name="email"]', emVal.message);
+
+    if (isNew && !password) markError('[name="password"]', 'Password is required for new staff members.');
+
+    if (hasError) return false;
+
+    start_load();
+    $.ajax({
+      url: '/api/user/save',
+      data: new FormData($(this)[0]),
+      cache: false,
+      contentType: false,
+      processData: false,
+      method: 'POST',
+      type: 'POST',
+      success: function(resp){
+        var data = resp;
+        if (typeof resp === 'string') {
+          try { data = JSON.parse(resp); } catch(e) { data = resp; }
+        }
+
+        if(resp == 1 || (data && data.status === 'success')){
+          alert_toast('Data successfully saved', "success");
+          setTimeout(function(){
+            location.href = '/dashboard?page=staff_list';
+          }, 1500);
+        } else if(resp == 2 || (data && data.message && data.message.indexOf('already exists') !== -1)){
+          $('#msg').html('<div class="alert alert-danger mb-3 py-2"><i class="fas fa-exclamation-triangle mr-1"></i> Email already exists.</div>');
+          $('[name="email"]').addClass('is-invalid').focus();
+          alert_toast('Email already exists.', "error");
+          end_load();
+        } else {
+          var errMsg = (data && data.message) ? data.message : 'An error occurred while saving the data.';
+          $('#msg').html('<div class="alert alert-danger mb-3 py-2"><i class="fas fa-exclamation-triangle mr-1"></i> ' + errMsg + '</div>');
+          alert_toast(errMsg, "error");
+          end_load();
+        }
+      },
+      error: function(err){
+        console.error(err);
+        $('#msg').html('<div class="alert alert-danger mb-3 py-2"><i class="fas fa-exclamation-triangle mr-1"></i> An error occurred while saving the data.</div>');
+        alert_toast('An error occurred while saving the data.', "error");
+        end_load();
+      }
+    });
+  });
+</script>

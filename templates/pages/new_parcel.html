@@ -1,0 +1,318 @@
+<style>
+  textarea {
+    resize: none;
+  }
+</style>
+<div class="col-lg-12">
+  <div class="card card-outline card-primary">
+    <div class="card-body">
+      <form action="" id="manage-parcel">
+        <input type="hidden" name="id" value="{{ parcel['id'] if parcel else '' }}">
+        <div id="msg"></div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label class="control-label">Reference / Tracking Number <small class="text-muted">({% if parcel %}Saved Tracking #{% else %}Optional - leave blank to auto-generate 12 digits{% endif %})</small></label>
+              <input type="text" name="reference_number" id="reference_number" class="form-control form-control-sm" value="{{ parcel['reference_number'] if parcel else '' }}" placeholder="Auto-generated 12-digit number">
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <b>Sender Information</b>
+            <div class="form-group">
+              <label class="control-label">Name</label>
+              <input type="text" name="sender_name" class="form-control form-control-sm" value="{{ parcel['sender_name'] if parcel else '' }}" required>
+            </div>
+            <div class="form-group">
+              <label class="control-label">Address</label>
+              <input type="text" name="sender_address" class="form-control form-control-sm" value="{{ parcel['sender_address'] if parcel else '' }}" required>
+            </div>
+            <div class="form-group">
+              <label class="control-label">Contact # (Indian 10-digit mobile)</label>
+              <input type="text" name="sender_contact" class="form-control form-control-sm" value="{{ parcel['sender_contact'] if parcel else '' }}" placeholder="e.g. 9876543210" required>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <b>Recipient Information</b>
+            <div class="form-group">
+              <label class="control-label">Name</label>
+              <input type="text" name="recipient_name" class="form-control form-control-sm" value="{{ parcel['recipient_name'] if parcel else '' }}" required>
+            </div>
+            <div class="form-group">
+              <label class="control-label">Address</label>
+              <input type="text" name="recipient_address" class="form-control form-control-sm" value="{{ parcel['recipient_address'] if parcel else '' }}" required>
+            </div>
+            <div class="form-group">
+              <label class="control-label">Contact # (Indian 10-digit mobile)</label>
+              <input type="text" name="recipient_contact" class="form-control form-control-sm" value="{{ parcel['recipient_contact'] if parcel else '' }}" placeholder="e.g. 9876543211" required>
+            </div>
+          </div>
+        </div>
+        <hr>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="dtype">Type</label>
+              <input type="checkbox" name="type" id="dtype" {% if parcel and parcel['type'] == 1 %}checked{% endif %} data-bootstrap-switch data-toggle="toggle" data-on="Deliver" data-off="Pickup" class="switch-toggle status_chk" data-size="xs" data-offstyle="info" data-width="5rem" value="1">
+              <small>Deliver = Deliver to Recipient Address</small>
+              <small>, Pickup = Pickup to nearest Branch</small>
+            </div>
+          </div>
+          <div class="col-md-6" id="branch-select-container" {% if parcel and parcel['type'] == 1 %}style="display: none"{% endif %}>
+            {% if session.get('login_branch_id', 0) <= 0 %}
+            <div class="form-group" id="fbi-field">
+              <label class="control-label">Branch Processed</label>
+              <select name="from_branch_id" id="from_branch_id" class="form-control select2" required>
+                <option value=""></option>
+                {% for b in branches %}
+                <option value="{{ b['id'] }}" {% if parcel and parcel['from_branch_id']|string == b['id']|string %}selected{% endif %}>
+                  {{ b['branch_code'] }} | {{ b['address'] | title }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            {% else %}
+            <input type="hidden" name="from_branch_id" value="{{ session.get('login_branch_id') }}">
+            {% endif %}  
+            <div class="form-group" id="tbi-field">
+              <label class="control-label">Pickup Branch</label>
+              <select name="to_branch_id" id="to_branch_id" class="form-control select2">
+                <option value=""></option>
+                {% for b in branches %}
+                <option value="{{ b['id'] }}" {% if parcel and parcel['to_branch_id']|string == b['id']|string %}selected{% endif %}>
+                  {{ b['branch_code'] }} | {{ b['address'] | title }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+        </div>
+        <hr>
+        <b>Parcel Information</b>
+        <table class="table table-bordered" id="parcel-items">
+          <thead>
+            <tr>
+              <th>Weight (kg)</th>
+              <th>Height (cm)</th>
+              <th>Length (cm)</th>
+              <th>Width (cm)</th>
+              <th>Price ($)</th>
+              {% if not parcel %}
+              <th></th>
+              {% endif %}
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="number" step="any" min="0.01" name="weight[]" class="form-control form-control-sm" value="{{ parcel['weight'] if parcel else '' }}" required placeholder="e.g. 2.5"></td>
+              <td><input type="number" step="any" min="0.01" name="height[]" class="form-control form-control-sm" value="{{ parcel['height'] if parcel else '' }}" required placeholder="e.g. 10"></td>
+              <td><input type="number" step="any" min="0.01" name="length[]" class="form-control form-control-sm" value="{{ parcel['length'] if parcel else '' }}" required placeholder="e.g. 30"></td>
+              <td><input type="number" step="any" min="0.01" name="width[]" class="form-control form-control-sm" value="{{ parcel['width'] if parcel else '' }}" required placeholder="e.g. 20"></td>
+              <td><input type="number" step="any" min="0.01" class="form-control form-control-sm text-right item-price" name="price[]" value="{{ parcel['price'] if parcel else '' }}" required placeholder="e.g. 150"></td>
+              {% if not parcel %}
+              <td class="text-center"><button class="btn btn-sm btn-danger" type="button" onclick="$(this).closest('tr').remove(); calc();"><i class="fa fa-times"></i></button></td>
+              {% endif %}
+            </tr>
+          </tbody>
+          {% if not parcel %}
+          <tfoot>
+            <tr>
+              <th colspan="4" class="text-right">Total</th>
+              <th class="text-right" id="tAmount">0.00</th>
+              <th></th>
+            </tr>
+          </tfoot>
+          {% endif %}
+        </table>
+        {% if not parcel %}
+        <div class="row">
+          <div class="col-md-12 d-flex justify-content-end">
+            <button class="btn btn-sm btn-primary bg-gradient-primary" type="button" id="new_parcel"><i class="fa fa-plus"></i> Add Item</button>
+          </div>
+        </div>
+        {% endif %}
+      </form>
+    </div>
+    <div class="card-footer border-top border-info">
+      <div class="d-flex w-100 justify-content-center align-items-center">
+        <button class="btn btn-flat bg-gradient-primary mx-2" form="manage-parcel">Save</button>
+        <a class="btn btn-flat bg-gradient-secondary mx-2" href="/dashboard?page=parcel_list">Cancel</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="ptr_clone" class="d-none">
+  <table>
+    <tr>
+      <td><input type="number" step="any" min="0.01" name="weight[]" class="form-control form-control-sm" required placeholder="e.g. 2.5"></td>
+      <td><input type="number" step="any" min="0.01" name="height[]" class="form-control form-control-sm" required placeholder="e.g. 10"></td>
+      <td><input type="number" step="any" min="0.01" name="length[]" class="form-control form-control-sm" required placeholder="e.g. 30"></td>
+      <td><input type="number" step="any" min="0.01" name="width[]" class="form-control form-control-sm" required placeholder="e.g. 20"></td>
+      <td><input type="number" step="any" min="0.01" class="form-control form-control-sm text-right item-price" name="price[]" required placeholder="e.g. 150"></td>
+      <td class="text-center"><button class="btn btn-sm btn-danger" type="button" onclick="$(this).closest('tr').remove(); calc();"><i class="fa fa-times"></i></button></td>
+    </tr>
+  </table>
+</div>
+
+<script>
+  function validateIndianPhone(phone) {
+    if (!phone) return { valid: false, message: "Contact number is required." };
+    phone = phone.trim();
+    if (!phone) return { valid: false, message: "Contact number is required." };
+    if (/[a-zA-Z]/.test(phone)) return { valid: false, message: "Contact number cannot contain letters." };
+    var cleaned = phone.replace(/[\s\-\+\(\)\.]/g, '');
+    if (!/^\d+$/.test(cleaned)) return { valid: false, message: "Contact number contains invalid characters." };
+    if (cleaned.length === 12 && cleaned.startsWith('91')) cleaned = cleaned.substring(2);
+    else if (cleaned.length === 11 && cleaned.startsWith('0')) cleaned = cleaned.substring(1);
+    if (cleaned.length !== 10) return { valid: false, message: "Contact number must be a valid 10-digit mobile number." };
+    if (!/^[6-9]/.test(cleaned)) return { valid: false, message: "Contact number must start with 6, 7, 8, or 9." };
+    return { valid: true, cleaned: cleaned };
+  }
+
+  $('#dtype').change(function(){
+    if($(this).prop('checked') == true){
+      $('#tbi-field').hide();
+    }else{
+      $('#tbi-field').show();
+    }
+  });
+
+  $(document).on('input keyup change', '.item-price', function(){
+    calc();
+  });
+
+  $('#new_parcel').click(function(){
+    var tr = $('#ptr_clone tr').clone();
+    $('#parcel-items tbody').append(tr);
+    calc();
+  });
+
+  $('#manage-parcel').submit(function(e){
+    e.preventDefault();
+    $('#msg').html('');
+    $('input, select').removeClass('is-invalid');
+
+    var sender_name = $.trim($('[name="sender_name"]').val());
+    var sender_address = $.trim($('[name="sender_address"]').val());
+    var sender_contact = $.trim($('[name="sender_contact"]').val());
+    var recipient_name = $.trim($('[name="recipient_name"]').val());
+    var recipient_address = $.trim($('[name="recipient_address"]').val());
+    var recipient_contact = $.trim($('[name="recipient_contact"]').val());
+
+    var hasError = false;
+    function markError(selector, msg) {
+      $(selector).addClass('is-invalid');
+      if (!hasError) {
+        $('#msg').html('<div class="alert alert-danger mb-3 py-2"><i class="fas fa-exclamation-circle mr-1"></i> ' + msg + '</div>');
+        $(selector).focus();
+        hasError = true;
+      }
+    }
+
+    if (!sender_name) markError('[name="sender_name"]', 'Sender name is required.');
+    if (!sender_address) markError('[name="sender_address"]', 'Sender address is required.');
+
+    var sPh = validateIndianPhone(sender_contact);
+    if (!sPh.valid) markError('[name="sender_contact"]', 'Sender contact: ' + sPh.message);
+
+    if (!recipient_name) markError('[name="recipient_name"]', 'Recipient name is required.');
+    if (!recipient_address) markError('[name="recipient_address"]', 'Recipient address is required.');
+
+    var rPh = validateIndianPhone(recipient_contact);
+    if (!rPh.valid) markError('[name="recipient_contact"]', 'Recipient contact: ' + rPh.message);
+
+    // Origin branch check
+    var fromBranch = $('[name="from_branch_id"]').val();
+    if (!fromBranch) markError('[name="from_branch_id"]', 'Origin branch is required.');
+
+    // Destination branch check if pickup
+    var isDeliver = $('#dtype').prop('checked');
+    if (!isDeliver) {
+      var toBranch = $('[name="to_branch_id"]').val();
+      if (!toBranch) markError('[name="to_branch_id"]', 'Destination pickup branch is required.');
+    }
+
+    // Parcel rows check
+    var rows = $('#parcel-items tbody tr');
+    if (rows.length <= 0) {
+      alert_toast("Please add at least 1 parcel item.", "error");
+      return false;
+    }
+
+    rows.each(function(idx, el){
+      var w = parseFloat($(el).find('[name="weight[]"]').val());
+      var h = parseFloat($(el).find('[name="height[]"]').val());
+      var l = parseFloat($(el).find('[name="length[]"]').val());
+      var wd = parseFloat($(el).find('[name="width[]"]').val());
+      var p = parseFloat($(el).find('[name="price[]"]').val());
+
+      if (isNaN(w) || w <= 0) markError($(el).find('[name="weight[]"]'), `Item ${idx+1}: Weight must be a positive number greater than zero.`);
+      if (isNaN(h) || h <= 0) markError($(el).find('[name="height[]"]'), `Item ${idx+1}: Height must be a positive number greater than zero.`);
+      if (isNaN(l) || l <= 0) markError($(el).find('[name="length[]"]'), `Item ${idx+1}: Length must be a positive number greater than zero.`);
+      if (isNaN(wd) || wd <= 0) markError($(el).find('[name="width[]"]'), `Item ${idx+1}: Width must be a positive number greater than zero.`);
+      if (isNaN(p) || p <= 0) markError($(el).find('[name="price[]"]'), `Item ${idx+1}: Price must be a positive number greater than zero.`);
+    });
+
+    if (hasError) return false;
+
+    start_load();
+    $.ajax({
+      url: '/api/parcel/save',
+      data: new FormData($(this)[0]),
+      cache: false,
+      contentType: false,
+      processData: false,
+      method: 'POST',
+      type: 'POST',
+      success: function(resp){
+        var data = resp;
+        if (typeof resp === 'string') {
+          try { data = JSON.parse(resp); } catch(e) { data = resp; }
+        }
+
+        if(resp == 1 || (data && data.status === 'success')){
+          alert_toast('Data successfully saved.', "success");
+          setTimeout(function(){
+            location.replace('/dashboard?page=parcel_list');
+          }, 750);
+        } else {
+          var errMsg = 'An error occurred while saving the data.';
+          if (data && data.message) errMsg = data.message;
+          else if (typeof resp === 'string' && resp.length > 2 && resp !== '0') errMsg = resp;
+
+          $('#msg').html('<div class="alert alert-danger mb-3 py-2"><i class="fas fa-exclamation-triangle mr-1"></i> ' + errMsg + '</div>');
+          if (errMsg.toLowerCase().indexOf('parcel reference') !== -1 || errMsg.toLowerCase().indexOf('reference') !== -1) {
+            $('#reference_number').addClass('is-invalid').focus();
+          }
+          alert_toast(errMsg, "error");
+          end_load();
+        }
+      },
+      error: function(err){
+        console.error(err);
+        $('#msg').html('<div class="alert alert-danger mb-3 py-2"><i class="fas fa-exclamation-triangle mr-1"></i> An error occurred while saving the data.</div>');
+        alert_toast('An error occurred while saving the data.', "error");
+        end_load();
+      }
+    });
+  });
+
+  function calc(){
+    var total = 0;
+    $('#parcel-items .item-price').each(function(){
+      var p = parseFloat($(this).val()) || 0;
+      if (p > 0) total += p;
+    });
+    if($('#tAmount').length > 0){
+      $('#tAmount').text(total.toLocaleString('en-US', {style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2}));
+    }
+  }
+
+  $(document).ready(function(){
+    calc();
+  });
+</script>

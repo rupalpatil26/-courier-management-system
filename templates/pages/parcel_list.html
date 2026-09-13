@@ -1,0 +1,209 @@
+<div class="col-lg-12">
+	<div class="card card-outline card-primary">
+		<div class="card-header">
+			<div class="card-tools">
+				<a class="btn btn-block btn-sm btn-default btn-flat border-primary" href="/dashboard?page=new_parcel"><i class="fa fa-plus"></i> Add New Parcel</a>
+			</div>
+		</div>
+		<div class="card-body">
+			<table class="table table-hover table-bordered" id="list">
+				<thead>
+					<tr>
+						<th class="text-center">#</th>
+						<th class="text-center">QR Code</th>
+						<th>Reference Number</th>
+						<th>Sender Name</th>
+						<th>Recipient Name</th>
+						<th>Status</th>
+						<th>Action</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for row in parcels %}
+					<tr>
+						<td class="text-center">{{ loop.index }}</td>
+						<!-- Visible Real QR Code Thumbnail (Requirement 1 & 3) -->
+						<td class="text-center">
+							<div class="d-inline-block p-1 bg-white rounded shadow-sm">
+								<img src="/api/parcel/{{ row['reference_number'] }}/qrcode" alt="QR" style="width: 46px; height: 46px; display: block; cursor: pointer;" class="open-qr-preview" data-ref="{{ row['reference_number'] }}" data-recipient="{{ (row['recipient_name'] or '') | escape }}" data-address="{{ (row['recipient_address'] or '') | escape }}" title="Click to view & download QR Code">
+							</div>
+						</td>
+						<td>
+							<b class="text-info font-weight-bold" style="letter-spacing: 0.5px;">{{ row['reference_number'] }}</b>
+							<div class="small text-muted">{{ row['weight'] }} kg | ${{ "{:,.2f}".format(row['price'] | float) if row['price'] else '0.00' }}</div>
+						</td>
+						<td><b>{{ (row['sender_name'] or '') | title }}</b></td>
+						<td><b>{{ (row['recipient_name'] or '') | title }}</b></td>
+						<td class="text-center">
+							{% if row['status'] == 1 %}
+								<span class='badge badge-pill badge-info'> Collected</span>
+							{% elif row['status'] == 2 %}
+								<span class='badge badge-pill badge-info'> Shipped</span>
+							{% elif row['status'] == 3 %}
+								<span class='badge badge-pill badge-primary'> In-Transit</span>
+							{% elif row['status'] == 4 %}
+								<span class='badge badge-pill badge-primary'> Arrived At Destination</span>
+							{% elif row['status'] == 5 %}
+								<span class='badge badge-pill badge-warning'> Out for Delivery</span>
+							{% elif row['status'] == 6 %}
+								<span class='badge badge-pill badge-primary'> Ready to Pickup</span>
+							{% elif row['status'] == 7 %}
+								<span class='badge badge-pill badge-success'> Delivered</span>
+							{% elif row['status'] == 8 %}
+								<span class='badge badge-pill badge-success'> Picked-up</span>
+							{% elif row['status'] == 9 %}
+								<span class='badge badge-pill badge-danger'> Unsuccessfull Delivery Attempt</span>
+							{% else %}
+								<span class='badge badge-pill badge-info'> Item Accepted by Courier</span>
+							{% endif %}
+						</td>
+						<td class="text-center">
+							<div class="btn-group">
+								<!-- Dedicated QR Code Button (Requirement 2) -->
+								<button type="button" class="btn btn-dark btn-flat open-qr-preview" data-ref="{{ row['reference_number'] }}" data-recipient="{{ (row['recipient_name'] or '') | escape }}" data-address="{{ (row['recipient_address'] or '') | escape }}" title="View & Print QR Code">
+									<i class="fas fa-qrcode text-info"></i>
+								</button>
+								<button type="button" class="btn btn-info btn-flat view_parcel" data-id="{{ row['id'] }}" title="View Parcel Details">
+									<i class="fas fa-eye"></i>
+								</button>
+								<a href="/dashboard?page=edit_parcel&id={{ row['id'] }}" class="btn btn-primary btn-flat" title="Edit Parcel">
+									<i class="fas fa-edit"></i>
+								</a>
+								<button type="button" class="btn btn-danger btn-flat delete_parcel" data-id="{{ row['id'] }}" title="Delete">
+									<i class="fas fa-trash"></i>
+								</button>
+							</div>
+						</td>
+					</tr>	
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>
+
+<!-- Dedicated Interactive QR Code Modal -->
+<div class="modal fade" id="parcelListQrModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-md" role="document">
+    <div class="modal-content" style="background: #1e293b; color: white; border-radius: 12px; border: 1px solid rgba(56, 189, 248, 0.3);">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title font-weight-bold text-info"><i class="fas fa-qrcode mr-2"></i> Parcel QR Code</h5>
+        <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body text-center py-4">
+        <h4 class="font-weight-bold text-white mb-1" id="qrModalRef">#000000000000</h4>
+        <p class="text-muted small mb-3">Scan with any smartphone camera to open the live tracking timeline.</p>
+
+        <!-- Clear Displayed QR Code (Requirement 3) -->
+        <div class="p-3 bg-white rounded d-inline-block mb-3" style="box-shadow: 0 6px 20px rgba(0,0,0,0.5);">
+          <img id="qrModalImg" src="" alt="QR Code" style="width: 190px; height: 190px; display: block;">
+        </div>
+
+        <!-- Barcode Display -->
+        <div class="p-2 bg-white rounded mb-3 d-inline-block" style="max-width: 90%;">
+          <img id="qrModalBarcodeImg" src="" alt="Barcode" style="height: 44px; max-width: 100%; display: block;">
+        </div>
+
+        <!-- Download and Print Action Buttons (Requirements 4 & 5) -->
+        <div class="d-flex justify-content-center gap-2 flex-wrap mt-2">
+          <a id="qrModalDownloadBtn" href="" download="" class="btn btn-info font-weight-bold mr-2 mb-2">
+            <i class="fas fa-download mr-1"></i> Download QR Code
+          </a>
+          <button type="button" class="btn btn-outline-light font-weight-bold mr-2 mb-2" id="qrModalPrintBtn">
+            <i class="fas fa-print mr-1"></i> Print QR Label
+          </button>
+          <a id="qrModalTrackBtn" href="" target="_blank" class="btn btn-outline-info font-weight-bold mb-2">
+            <i class="fas fa-search-location mr-1"></i> Live Track
+          </a>
+        </div>
+      </div>
+      <div class="modal-footer border-0 pt-0 justify-content-center">
+        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+	table td{ vertical-align: middle !important; }
+</style>
+
+<script>
+	$(document).ready(function(){
+		$('#list').dataTable();
+
+		$('.view_parcel').click(function(){
+			uni_modal("Parcel's Details", "/modal/view_parcel?id=" + $(this).attr('data-id'), "large");
+		});
+
+		$('.delete_parcel').click(function(){
+			_conf("Are you sure to delete this parcel?", "delete_parcel", [$(this).attr('data-id')]);
+		});
+
+		// QR Code Modal Handler
+		$(document).on('click', '.open-qr-preview', function() {
+			const ref = $(this).attr('data-ref');
+			const recipient = $(this).attr('data-recipient') || '';
+			const address = $(this).attr('data-address') || '';
+
+			$('#qrModalRef').text('#' + ref);
+			$('#qrModalImg').attr('src', '/api/parcel/' + ref + '/qrcode');
+			$('#qrModalBarcodeImg').attr('src', '/api/parcel/' + ref + '/barcode');
+			$('#qrModalDownloadBtn').attr('href', '/api/parcel/' + ref + '/qrcode').attr('download', 'QR_' + ref + '.png');
+			$('#qrModalTrackBtn').attr('href', '/track?ref_no=' + ref);
+
+			$('#qrModalPrintBtn').off('click').on('click', function() {
+				const qrUrl = '/api/parcel/' + ref + '/qrcode';
+				const bcUrl = '/api/parcel/' + ref + '/barcode';
+				const printWin = window.open('', '', 'width=650,height=550');
+				printWin.document.write(`
+					<!DOCTYPE html>
+					<html>
+					<head>
+						<title>Parcel QR Label #${ref}</title>
+						<style>
+							body { font-family: 'Segoe UI', Arial, sans-serif; padding: 25px; color: #0f172a; text-align: center; }
+							.label-box { border: 2px dashed #0284c7; border-radius: 12px; padding: 20px; max-width: 420px; margin: 0 auto; }
+							.qr-img { width: 190px; height: 190px; margin: 10px 0; }
+							.ref-num { font-size: 22px; font-weight: 800; color: #0284c7; letter-spacing: 1px; }
+							.barcode-img { height: 45px; max-width: 260px; margin: 10px 0; }
+							.info-text { font-size: 13px; color: #475569; margin: 4px 0; }
+						</style>
+					</head>
+					<body onload="window.print(); setTimeout(function(){ window.close(); }, 750);">
+						<div class="label-box">
+							<div style="font-size: 12px; text-transform: uppercase; color: #64748b; font-weight: bold;">Courier Shipment QR Label</div>
+							<div class="ref-num">#${ref}</div>
+							<div><img src="${qrUrl}" class="qr-img" alt="QR Code"></div>
+							<div><img src="${bcUrl}" class="barcode-img" alt="Barcode"></div>
+							<div class="info-text"><strong>Recipient:</strong> ${recipient || 'Valued Customer'}</div>
+							<div class="info-text"><strong>Destination:</strong> ${address || 'Local Destination'}</div>
+							<div style="font-size: 11px; color: #94a3b8; margin-top: 10px;">Scan QR code with smartphone to track delivery</div>
+						</div>
+					</body>
+					</html>
+				`);
+				printWin.document.close();
+			});
+
+			$('#parcelListQrModal').modal('show');
+		});
+	});
+
+	function delete_parcel($id){
+		start_load();
+		$.ajax({
+			url: '/api/parcel/delete',
+			method: 'POST',
+			data: {id: $id},
+			success: function(resp){
+				if(resp == 1){
+					alert_toast("Data successfully deleted", 'success');
+					setTimeout(function(){
+						location.reload();
+					}, 1500);
+				}
+			}
+		});
+	}
+</script>

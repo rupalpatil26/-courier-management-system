@@ -1,0 +1,164 @@
+<style>
+  textarea {
+    resize: none;
+  }
+</style>
+<div class="col-lg-12">
+  <div class="card card-outline card-primary">
+    <div class="card-body">
+      <form action="" id="manage-branch">
+        <input type="hidden" name="id" value="{{ branch['id'] if branch else '' }}">
+        <div class="row">
+          <div class="col-md-12">
+            <div id="msg"></div>
+
+            <div class="row">
+              <div class="col-sm-6 form-group">
+                <label for="branch_code" class="control-label">Branch Code <small class="text-muted">(Leave blank to auto-generate)</small></label>
+                <input type="text" name="branch_code" id="branch_code" class="form-control" placeholder="e.g. DEL001" value="{{ branch['branch_code'] if branch else '' }}">
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-sm-6 form-group">
+                <label for="street" class="control-label">Street/Building</label>
+                <textarea name="street" id="street" cols="30" rows="2" class="form-control" required>{{ branch['street'] if branch else '' }}</textarea>
+              </div>
+              <div class="col-sm-6 form-group">
+                <label for="city" class="control-label">City</label>
+                <textarea name="city" id="city" cols="30" rows="2" class="form-control" required>{{ branch['city'] if branch else '' }}</textarea>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-sm-6 form-group">
+                <label for="state" class="control-label">State</label>
+                <textarea name="state" id="state" cols="30" rows="2" class="form-control" required>{{ branch['state'] if branch else '' }}</textarea>
+              </div>
+              <div class="col-sm-6 form-group">
+                <label for="zip_code" class="control-label">Zip Code/ Postal Code</label>
+                <textarea name="zip_code" id="zip_code" cols="30" rows="2" class="form-control" required>{{ branch['zip_code'] if branch else '' }}</textarea>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-sm-6 form-group">
+                <label for="country" class="control-label">Country</label>
+                <textarea name="country" id="country" cols="30" rows="2" class="form-control" required>{{ branch['country'] if branch else '' }}</textarea>
+              </div>
+              <div class="col-sm-6 form-group">
+                <label for="contact" class="control-label">Contact # (Indian 10-digit mobile)</label>
+                <textarea name="contact" id="contact" cols="30" rows="2" class="form-control" placeholder="e.g. 9876543210" required>{{ branch['contact'] if branch else '' }}</textarea>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="card-footer border-top border-info">
+      <div class="d-flex w-100 justify-content-center align-items-center">
+        <button class="btn btn-flat bg-gradient-primary mx-2" form="manage-branch">Save</button>
+        <a class="btn btn-flat bg-gradient-secondary mx-2" href="/dashboard?page=branch_list">Cancel</a>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  function validateIndianPhone(phone) {
+    if (!phone) return { valid: false, message: "Contact number is required." };
+    phone = phone.trim();
+    if (!phone) return { valid: false, message: "Contact number is required." };
+    if (/[a-zA-Z]/.test(phone)) return { valid: false, message: "Contact number cannot contain letters." };
+    var cleaned = phone.replace(/[\s\-\+\(\)\.]/g, '');
+    if (!/^\d+$/.test(cleaned)) return { valid: false, message: "Contact number contains invalid characters." };
+    if (cleaned.length === 12 && cleaned.startsWith('91')) cleaned = cleaned.substring(2);
+    else if (cleaned.length === 11 && cleaned.startsWith('0')) cleaned = cleaned.substring(1);
+    if (cleaned.length !== 10) return { valid: false, message: "Contact number must be a valid 10-digit mobile number." };
+    if (!/^[6-9]/.test(cleaned)) return { valid: false, message: "Contact number must start with 6, 7, 8, or 9." };
+    return { valid: true, cleaned: cleaned };
+  }
+
+  $('#manage-branch').submit(function(e){
+    e.preventDefault();
+    $('#msg').html('');
+    $('.form-control').removeClass('is-invalid');
+
+    var street = $.trim($('#street').val());
+    var city = $.trim($('#city').val());
+    var state = $.trim($('#state').val());
+    var zip_code = $.trim($('#zip_code').val());
+    var country = $.trim($('#country').val());
+    var contact = $.trim($('#contact').val());
+
+    var hasError = false;
+    function markError(selector, msg) {
+      $(selector).addClass('is-invalid');
+      if (!hasError) {
+        $('#msg').html('<div class="alert alert-danger mb-3 py-2"><i class="fas fa-exclamation-circle mr-1"></i> ' + msg + '</div>');
+        $(selector).focus();
+        hasError = true;
+      }
+    }
+
+    if (!street) markError('#street', 'Street/Building is required.');
+    if (!city) markError('#city', 'City is required.');
+    if (!state) markError('#state', 'State is required.');
+    if (!zip_code) markError('#zip_code', 'Zip Code/Postal Code is required.');
+    if (!country) markError('#country', 'Country is required.');
+
+    if (!contact) {
+      markError('#contact', 'Contact number is required.');
+    } else {
+      var phVal = validateIndianPhone(contact);
+      if (!phVal.valid) {
+        markError('#contact', phVal.message);
+      }
+    }
+
+    if (hasError) return false;
+
+    start_load();
+    $.ajax({
+      url: '/api/branch/save',
+      data: new FormData($(this)[0]),
+      cache: false,
+      contentType: false,
+      processData: false,
+      method: 'POST',
+      type: 'POST',
+      success: function(resp){
+        var data = resp;
+        if (typeof resp === 'string') {
+          try { data = JSON.parse(resp); } catch(e) { data = resp; }
+        }
+
+        if (resp == 1 || (data && data.status === 'success')) {
+          alert_toast('Data successfully saved', "success");
+          setTimeout(function(){
+            location.href = '/dashboard?page=branch_list';
+          }, 1500);
+        } else {
+          var errMsg = 'An error occurred while saving the data.';
+          if (data && data.message) errMsg = data.message;
+          else if (typeof resp === 'string' && resp.length > 2 && resp !== '0') errMsg = resp;
+
+          $('#msg').html('<div class="alert alert-danger mb-3 py-2"><i class="fas fa-exclamation-triangle mr-1"></i> ' + errMsg + '</div>');
+          if (errMsg.toLowerCase().indexOf('branch code') !== -1) {
+            $('#branch_code').addClass('is-invalid').focus();
+          } else if (errMsg.toLowerCase().indexOf('contact') !== -1) {
+            $('#contact').addClass('is-invalid').focus();
+          }
+          alert_toast(errMsg, "error");
+          end_load();
+        }
+      },
+      error: function(err){
+        console.error(err);
+        $('#msg').html('<div class="alert alert-danger mb-3 py-2"><i class="fas fa-exclamation-triangle mr-1"></i> An error occurred while saving the data.</div>');
+        alert_toast('An error occurred while saving the data.', "error");
+        end_load();
+      }
+    });
+  });
+</script>

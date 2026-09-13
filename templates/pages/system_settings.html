@@ -1,0 +1,95 @@
+<div class="col-lg-12">
+	<div class="card card-outline card-primary">
+		<div class="card-body">
+			<form action="" id="manage-system_settings" enctype="multipart/form-data">
+        <input type="hidden" name="id" value="{{ settings.id if settings else (system.id if system else '') }}">
+				<div class="row">
+					<div class="col-md-6">
+						<div class="form-group">
+							<label for="" class="control-label">System Name</label>
+							<input type="text" class="form-control form-control-sm" name="name" value="{{ settings.name if settings else (system.name if system else '') }}" required>
+						</div>
+					</div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="" class="control-label">Contact #</label>
+              <input type="text" class="form-control form-control-sm" name="contact" value="{{ settings.contact if settings else (system.contact if system else '') }}" required>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="" class="control-label">Email</label>
+              <input type="email" class="form-control form-control-sm" name="email" value="{{ settings.email if settings else (system.email if system else '') }}" required>
+            </div>
+          </div>
+				</div>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="" class="control-label">Address</label>
+              <textarea name="address" id="" cols="30" rows="3" class="form-control">{{ settings.address if settings else (system.address if system else '') }}</textarea>
+            </div>
+          </div>
+          <div class="col-md-6">
+           <div class="form-group">
+              <label for="" class="control-label">Cover Image</label>
+                <div class="custom-file">
+                  <input type="file" class="custom-file-input" id="customFile" name="cover" accept="image/*" onchange="displayImgCover(this,$(this))">
+                  <label class="custom-file-label" for="customFile">Choose file</label>
+                </div>
+            </div>
+            <div class="form-group d-flex justify-content-center">
+              <img src="/assets/uploads/{{ settings.cover_img if settings and settings.cover_img else (system.cover_img if system and system.cover_img else '') }}" alt="" id="cover" class="img-fluid img-thumbnail" style="max-height: 150px; {% if not (settings and settings.cover_img) and not (system and system.cover_img) %}display:none;{% endif %}">
+            </div>
+          </div>
+        </div>
+      </form>
+    	</div>
+    	<div class="card-footer border-top border-info">
+    		<div class="d-flex w-100 justify-content-center align-items-center">
+    			<button class="btn btn-flat bg-gradient-primary mx-2" form="manage-system_settings">Save</button>
+    			<button class="btn btn-flat bg-gradient-secondary mx-2" type="button" onclick="location.reload()">Cancel</button>
+    		</div>
+    	</div>
+	</div>
+</div>
+<script>
+	$('#manage-system_settings').submit(function(e){
+		e.preventDefault();
+		start_load();
+		$.ajax({
+			url: '/api/settings/save',
+			data: new FormData($(this)[0]),
+      cache: false,
+      contentType: false,
+      processData: false,
+      method: 'POST',
+      type: 'POST',
+			success: function(resp){
+				if(resp == 1 || resp == '1'){
+					alert_toast('Data successfully saved', "success");
+					setTimeout(function(){
+              location.reload();
+					}, 1500);
+				} else {
+          alert_toast('An error occurred while saving settings.', "error");
+          end_load();
+        }
+			},
+      error: function(err){
+        console.log(err);
+        alert_toast('An error occurred while saving settings.', "error");
+        end_load();
+      }
+		});
+	});
+  function displayImgCover(input, _this) {
+      if (input.files && input.files[0]) {
+          var reader = new FileReader();
+          reader.onload = function (e) {
+            $('#cover').attr('src', e.target.result).show();
+          }
+          reader.readAsDataURL(input.files[0]);
+      }
+  }
+</script>

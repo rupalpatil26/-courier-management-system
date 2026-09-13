@@ -1,0 +1,63 @@
+<div class="container-fluid p-2">
+  <form id="deliveryFeedbackForm">
+    <input type="hidden" name="parcel_id" value="{{ parcel.id }}">
+    
+    <div class="text-center mb-3">
+      <h6 class="font-weight-bold text-white mb-1">How was your delivery for #{{ parcel.reference_number }}?</h6>
+      <p class="text-muted small">Please rate your experience with our courier specialist.</p>
+
+      <!-- 5-Star Rating Selector -->
+      <div class="d-flex justify-content-center gap-2 my-3" id="starRatingGroup" style="font-size: 1.8rem; cursor: pointer;">
+        <i class="fas fa-star text-warning star-btn" data-val="1"></i>
+        <i class="fas fa-star text-warning star-btn" data-val="2"></i>
+        <i class="fas fa-star text-warning star-btn" data-val="3"></i>
+        <i class="fas fa-star text-warning star-btn" data-val="4"></i>
+        <i class="fas fa-star text-warning star-btn" data-val="5"></i>
+      </div>
+      <input type="hidden" name="rating" id="selectedRatingVal" value="5">
+    </div>
+
+    <div class="form-group mb-3">
+      <label class="text-muted small font-weight-bold">Additional Comments / Delivery Feedback</label>
+      <textarea name="comments" class="form-control" rows="3" placeholder="Package condition, timeliness, agent courtesy..." style="background: rgba(15,23,42,0.8); color: white; border-color: rgba(255,255,255,0.1);"></textarea>
+    </div>
+
+    <div class="d-flex justify-content-end gap-2">
+      <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cancel</button>
+      <button type="submit" class="btn btn-warning btn-sm font-weight-bold ml-2">Submit Feedback</button>
+    </div>
+  </form>
+</div>
+
+<script>
+  $('.star-btn').click(function() {
+    let val = parseInt($(this).data('val'));
+    $('#selectedRatingVal').val(val);
+    $('.star-btn').each(function() {
+      let v = parseInt($(this).data('val'));
+      if (v <= val) {
+        $(this).removeClass('text-muted far').addClass('text-warning fas');
+      } else {
+        $(this).removeClass('text-warning fas').addClass('text-muted far');
+      }
+    });
+  });
+
+  $('#deliveryFeedbackForm').submit(function(e) {
+    e.preventDefault();
+    start_load();
+    $.post('/api/feedback/submit', $(this).serialize(), function(resp) {
+      end_load();
+      if (resp.success) {
+        alert(resp.message);
+        $('.modal').modal('hide');
+        location.reload();
+      } else {
+        alert(resp.message || 'Failed to submit feedback.');
+      }
+    }).fail(function() {
+      end_load();
+      alert('An error occurred submitting feedback.');
+    });
+  });
+</script>

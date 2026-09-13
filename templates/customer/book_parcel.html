@@ -1,0 +1,257 @@
+{% extends 'customer/base.html' %}
+{% block title %}Book a Parcel{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <a href="{{ url_for('customer.dashboard') }}" class="text-muted small"><i class="fas fa-arrow-left mr-1"></i> Back to Dashboard</a>
+  <h2 class="font-weight-bold text-white mt-1 m-0">Book New Parcel Shipment 📦</h2>
+  <p class="text-muted">Fill in the recipient and package details to schedule your courier delivery.</p>
+</div>
+
+<!-- Form Alert Area -->
+<div id="book-msg-area"></div>
+
+<form action="{{ url_for('customer.book_parcel') }}" method="POST" id="customer-book-form">
+  <div class="row">
+    <!-- Sender & Recipient Information -->
+    <div class="col-lg-6 mb-4">
+      <div class="glass-card p-4 h-100">
+        <h5 class="font-weight-bold text-info mb-3"><i class="fas fa-user-tag mr-2"></i> 1. Sender Details (You)</h5>
+        
+        <div class="form-group mb-3">
+          <label class="text-muted small font-weight-bold">Sender Name</label>
+          <input type="text" class="form-control" name="sender_name" value="{{ form_data.get('sender_name') if form_data else (user.firstname ~ ' ' ~ user.lastname) }}" required style="background: rgba(15,23,42,0.6); color: white; border-color: rgba(255,255,255,0.1);">
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label class="text-muted small font-weight-bold">Sender Contact (Indian 10-digit mobile)</label>
+            <input type="text" class="form-control" name="sender_contact" value="{{ form_data.get('sender_contact') if form_data else (user.phone | default('')) }}" placeholder="e.g. 9876543210" required style="background: rgba(15,23,42,0.6); color: white; border-color: rgba(255,255,255,0.1);">
+          </div>
+          <div class="col-md-6">
+            <label class="text-muted small font-weight-bold">Sender Email</label>
+            <input type="email" class="form-control" name="sender_email" value="{{ form_data.get('sender_email') if form_data else user.email }}" required style="background: rgba(15,23,42,0.6); color: white; border-color: rgba(255,255,255,0.1);">
+          </div>
+        </div>
+
+        <div class="form-group mb-4">
+          <label class="text-muted small font-weight-bold">Pickup Address</label>
+          <textarea class="form-control" name="sender_address" rows="2" required style="background: rgba(15,23,42,0.6); color: white; border-color: rgba(255,255,255,0.1);">{{ form_data.get('sender_address') if form_data else (user.address | default('')) }}</textarea>
+        </div>
+
+        <h5 class="font-weight-bold text-info mb-3 pt-2 border-top" style="border-color: rgba(255,255,255,0.08) !important;"><i class="fas fa-map-marked-alt mr-2"></i> 2. Recipient Information</h5>
+
+        <div class="form-group mb-3">
+          <label class="text-muted small font-weight-bold">Recipient Full Name</label>
+          <input type="text" class="form-control" name="recipient_name" value="{{ form_data.get('recipient_name', '') if form_data else '' }}" required placeholder="e.g. Jane Doe" style="background: rgba(15,23,42,0.6); color: white; border-color: rgba(255,255,255,0.1);">
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label class="text-muted small font-weight-bold">Recipient Phone (Indian 10-digit mobile)</label>
+            <input type="text" class="form-control" name="recipient_contact" value="{{ form_data.get('recipient_contact', '') if form_data else '' }}" required placeholder="e.g. 9876543211" style="background: rgba(15,23,42,0.6); color: white; border-color: rgba(255,255,255,0.1);">
+          </div>
+          <div class="col-md-6">
+            <label class="text-muted small font-weight-bold">Recipient Email (for OTP)</label>
+            <input type="email" class="form-control" name="recipient_email" value="{{ form_data.get('recipient_email', '') if form_data else '' }}" required placeholder="recipient@example.com" style="background: rgba(15,23,42,0.6); color: white; border-color: rgba(255,255,255,0.1);">
+          </div>
+        </div>
+
+        <div class="form-group mb-0">
+          <label class="text-muted small font-weight-bold">Delivery Destination Address</label>
+          <textarea class="form-control" name="recipient_address" rows="3" required placeholder="Full street address, apartment/suite, city, postal code" style="background: rgba(15,23,42,0.6); color: white; border-color: rgba(255,255,255,0.1);">{{ form_data.get('recipient_address', '') if form_data else '' }}</textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Package & Logistics Details -->
+    <div class="col-lg-6 mb-4">
+      <div class="glass-card p-4 h-100 d-flex flex-column justify-content-between">
+        <div>
+          <h5 class="font-weight-bold text-info mb-3"><i class="fas fa-warehouse mr-2"></i> 3. Logistics & Branch Routing</h5>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="text-muted small font-weight-bold">Pickup / Origin Branch</label>
+              <select name="from_branch_id" class="form-control" required style="background: #1e293b; color: white; border-color: rgba(255,255,255,0.1);">
+                <option value="" disabled {% if not form_data or not form_data.get('from_branch_id') %}selected{% endif %}>Select Origin Branch</option>
+                {% for b in branches %}
+                <option value="{{ b.id }}" {% if form_data and form_data.get('from_branch_id')|string == b.id|string %}selected{% endif %}>{{ b.branch_code }} - {{ b.city }}, {{ b.state }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="text-muted small font-weight-bold">Destination Branch</label>
+              <select name="to_branch_id" class="form-control" required style="background: #1e293b; color: white; border-color: rgba(255,255,255,0.1);">
+                <option value="" disabled {% if not form_data or not form_data.get('to_branch_id') %}selected{% endif %}>Select Destination Branch</option>
+                {% for b in branches %}
+                <option value="{{ b.id }}" {% if form_data and form_data.get('to_branch_id')|string == b.id|string %}selected{% endif %}>{{ b.branch_code }} - {{ b.city }}, {{ b.state }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group mb-4">
+            <label class="text-muted small font-weight-bold">Delivery Type</label>
+            <select name="type" class="form-control" style="background: #1e293b; color: white; border-color: rgba(255,255,255,0.1);">
+              <option value="1" {% if form_data and form_data.get('type') == '1' %}selected{% endif %}>Deliver to Recipient Address (Doorstep)</option>
+              <option value="2" {% if not form_data or form_data.get('type') == '2' %}selected{% endif %}>Pickup at Destination Branch Counter</option>
+            </select>
+          </div>
+
+          <h5 class="font-weight-bold text-info mb-3 pt-2 border-top" style="border-color: rgba(255,255,255,0.08) !important;"><i class="fas fa-balance-scale mr-2"></i> 4. Parcel Dimensions & Pricing</h5>
+
+          <div class="row mb-3">
+            <div class="col-md-3 col-6 mb-2">
+              <label class="text-muted small font-weight-bold">Weight (kg)</label>
+              <input type="number" step="0.1" min="0.1" name="weight" id="pkg_weight" class="form-control calc-trigger" required value="{{ form_data.get('weight', '1.0') if form_data else '1.0' }}" style="background: rgba(15,23,42,0.6); color: white; border-color: rgba(255,255,255,0.1);">
+            </div>
+            <div class="col-md-3 col-6 mb-2">
+              <label class="text-muted small font-weight-bold">Length (cm)</label>
+              <input type="number" step="1" min="1" name="length" id="pkg_length" class="form-control calc-trigger" required value="{{ form_data.get('length', '20') if form_data else '20' }}" style="background: rgba(15,23,42,0.6); color: white; border-color: rgba(255,255,255,0.1);">
+            </div>
+            <div class="col-md-3 col-6 mb-2">
+              <label class="text-muted small font-weight-bold">Width (cm)</label>
+              <input type="number" step="1" min="1" name="width" id="pkg_width" class="form-control calc-trigger" required value="{{ form_data.get('width', '15') if form_data else '15' }}" style="background: rgba(15,23,42,0.6); color: white; border-color: rgba(255,255,255,0.1);">
+            </div>
+            <div class="col-md-3 col-6 mb-2">
+              <label class="text-muted small font-weight-bold">Height (cm)</label>
+              <input type="number" step="1" min="1" name="height" id="pkg_height" class="form-control calc-trigger" required value="{{ form_data.get('height', '10') if form_data else '10' }}" style="background: rgba(15,23,42,0.6); color: white; border-color: rgba(255,255,255,0.1);">
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="text-muted small font-weight-bold">Payment Method</label>
+              <select name="payment_method" class="form-control" style="background: #1e293b; color: white; border-color: rgba(255,255,255,0.1);">
+                <option value="Cash on Delivery" selected>Cash on Delivery (COD)</option>
+                <option value="Online / Prepaid">Online / Prepaid</option>
+                <option value="Card on Delivery">Card on Delivery (POS)</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="text-muted small font-weight-bold">Estimated Cost ($)</label>
+              <input type="text" name="price" id="pkg_price" readonly class="form-control font-weight-bold text-success" value="{{ form_data.get('price', '25.00') if form_data else '25.00' }}" style="background: rgba(15,23,42,0.8); border-color: rgba(34,197,94,0.4); font-size: 1.1rem;">
+            </div>
+          </div>
+
+          <div class="form-group mb-4">
+            <label class="text-muted small font-weight-bold">Special Delivery Instructions (Optional)</label>
+            <input type="text" name="delivery_notes" class="form-control" value="{{ form_data.get('delivery_notes', '') if form_data else '' }}" placeholder="e.g. Fragile glass, ring bell twice" style="background: rgba(15,23,42,0.6); color: white; border-color: rgba(255,255,255,0.1);">
+          </div>
+        </div>
+
+        <div>
+          <button type="submit" class="btn btn-gradient-primary btn-block py-3 font-weight-bold d-flex align-items-center justify-content-center">
+            <i class="fas fa-check-circle mr-2"></i> Confirm & Book Shipment Now
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+<script>
+  function validateIndianPhone(phone) {
+    if (!phone) return { valid: false, message: "Phone number is required." };
+    phone = phone.trim();
+    if (!phone) return { valid: false, message: "Phone number is required." };
+    if (/[a-zA-Z]/.test(phone)) return { valid: false, message: "Phone number cannot contain letters." };
+    var cleaned = phone.replace(/[\s\-\+\(\)\.]/g, '');
+    if (!/^\d+$/.test(cleaned)) return { valid: false, message: "Phone number contains invalid characters." };
+    if (cleaned.length === 12 && cleaned.startsWith('91')) cleaned = cleaned.substring(2);
+    else if (cleaned.length === 11 && cleaned.startsWith('0')) cleaned = cleaned.substring(1);
+    if (cleaned.length !== 10) return { valid: false, message: "Phone number must be a valid 10-digit mobile number." };
+    if (!/^[6-9]/.test(cleaned)) return { valid: false, message: "Phone number must start with 6, 7, 8, or 9." };
+    return { valid: true, cleaned: cleaned };
+  }
+
+  function validateEmailStr(email) {
+    if (!email) return { valid: false, message: "Email address is required." };
+    email = email.trim();
+    if (!email) return { valid: false, message: "Email address is required." };
+    if (/\s/.test(email)) return { valid: false, message: "Email address cannot contain spaces." };
+    var re = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}$/;
+    if (!re.test(email)) return { valid: false, message: "Please enter a valid email address (e.g. recipient@example.com)." };
+    return { valid: true };
+  }
+
+  function recalculatePrice() {
+    let w = parseFloat($('#pkg_weight').val()) || 1.0;
+    let l = parseFloat($('#pkg_length').val()) || 10;
+    let wd = parseFloat($('#pkg_width').val()) || 10;
+    let h = parseFloat($('#pkg_height').val()) || 10;
+
+    let vol_weight = (l * wd * h) / 5000.0;
+    let charge_weight = Math.max(w, vol_weight);
+
+    let price = 15.0 + (charge_weight * 10.0);
+    $('#pkg_price').val(price.toFixed(2));
+  }
+
+  $(document).ready(function(){
+    $('.calc-trigger').on('input change', recalculatePrice);
+    recalculatePrice();
+
+    $('#customer-book-form').submit(function(e){
+      $('#book-msg-area').html('');
+      $('.form-control').css('border-color', 'rgba(255,255,255,0.1)');
+
+      var sName = $.trim($('[name="sender_name"]').val());
+      var sContact = $.trim($('[name="sender_contact"]').val());
+      var sEmail = $.trim($('[name="sender_email"]').val());
+      var sAddress = $.trim($('[name="sender_address"]').val());
+
+      var rName = $.trim($('[name="recipient_name"]').val());
+      var rContact = $.trim($('[name="recipient_contact"]').val());
+      var rEmail = $.trim($('[name="recipient_email"]').val());
+      var rAddress = $.trim($('[name="recipient_address"]').val());
+
+      var fromBranch = $('[name="from_branch_id"]').val();
+      var toBranch = $('[name="to_branch_id"]').val();
+
+      var weight = parseFloat($('#pkg_weight').val());
+      var length = parseFloat($('#pkg_length').val());
+      var width = parseFloat($('#pkg_width').val());
+      var height = parseFloat($('#pkg_height').val());
+
+      var hasError = false;
+      function markError(selector, msg) {
+        $(selector).css('border-color', '#f87171');
+        if (!hasError) {
+          $('#book-msg-area').html('<div class="alert alert-danger mb-3 py-2" style="border-radius: 8px; font-size: 0.9rem;"><i class="fas fa-exclamation-circle mr-1"></i> ' + msg + '</div>');
+          $(selector).focus();
+          hasError = true;
+        }
+      }
+
+      if (!sName) markError('[name="sender_name"]', 'Sender name is required.');
+      var sPh = validateIndianPhone(sContact);
+      if (!sPh.valid) markError('[name="sender_contact"]', 'Sender: ' + sPh.message);
+      var sEm = validateEmailStr(sEmail);
+      if (!sEm.valid) markError('[name="sender_email"]', 'Sender: ' + sEm.message);
+      if (!sAddress) markError('[name="sender_address"]', 'Sender pickup address is required.');
+
+      if (!rName) markError('[name="recipient_name"]', 'Recipient name is required.');
+      var rPh = validateIndianPhone(rContact);
+      if (!rPh.valid) markError('[name="recipient_contact"]', 'Recipient: ' + rPh.message);
+      var rEm = validateEmailStr(rEmail);
+      if (!rEm.valid) markError('[name="recipient_email"]', 'Recipient: ' + rEm.message);
+      if (!rAddress) markError('[name="recipient_address"]', 'Delivery destination address is required.');
+
+      if (!fromBranch) markError('[name="from_branch_id"]', 'Please select an origin branch.');
+      if (!toBranch) markError('[name="to_branch_id"]', 'Please select a destination branch.');
+
+      if (isNaN(weight) || weight <= 0) markError('#pkg_weight', 'Weight must be greater than zero.');
+      if (isNaN(length) || length <= 0) markError('#pkg_length', 'Length must be greater than zero.');
+      if (isNaN(width) || width <= 0) markError('#pkg_width', 'Width must be greater than zero.');
+      if (isNaN(height) || height <= 0) markError('#pkg_height', 'Height must be greater than zero.');
+
+      if (hasError) {
+        e.preventDefault();
+        return false;
+      }
+    });
+  });
+</script>
+{% endblock %}

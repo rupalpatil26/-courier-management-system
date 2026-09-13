@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f172a; color: #f8fafc; margin: 0; padding: 20px; }
+  .email-container { max-width: 600px; margin: 0 auto; background: #1e293b; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; }
+  .header { background: linear-gradient(135deg, #065f46, #059669); padding: 30px 24px; text-align: center; }
+  .header h1 { margin: 0; font-size: 24px; color: #ffffff; font-weight: 700; }
+  .header p { margin: 8px 0 0 0; color: #a7f3d0; font-size: 14px; }
+  .body { padding: 28px 24px; }
+  .badge { display: inline-block; padding: 6px 14px; background: rgba(16, 185, 129, 0.15); color: #34d399; border-radius: 20px; font-weight: 600; font-size: 13px; margin-bottom: 20px; }
+  .otp-card { background: rgba(6, 78, 59, 0.4); border: 2px solid #10b981; border-radius: 12px; padding: 24px; text-align: center; margin: 24px 0; }
+  .otp-subtitle { font-size: 13px; color: #a7f3d0; text-transform: uppercase; letter-spacing: 1.5px; }
+  .otp-code { font-size: 38px; font-weight: 800; color: #ffffff; letter-spacing: 8px; margin: 12px 0; font-family: monospace; }
+  .otp-note { font-size: 13px; color: #cbd5e1; }
+  .ref-box { background: rgba(15, 23, 42, 0.6); border-radius: 8px; padding: 14px; margin: 20px 0; font-size: 14px; }
+  .btn-container { text-align: center; margin-top: 24px; }
+  .btn { display: inline-block; background: #059669; color: #ffffff !important; text-decoration: none; padding: 12px 28px; border-radius: 6px; font-weight: 600; font-size: 14px; }
+  .footer { background: #0f172a; padding: 20px; text-align: center; font-size: 12px; color: #64748b; border-top: 1px solid rgba(255,255,255,0.05); }
+</style>
+</head>
+<body>
+<div class="email-container">
+  <div class="header">
+    <h1>Courier Delivery In Progress</h1>
+    <p>Your package is out for delivery</p>
+  </div>
+  <div class="body">
+    <div class="badge">Out For Delivery</div>
+    <p>Hello <strong>{{ recipient_name }}</strong>,</p>
+    <p>Our delivery agent is currently on the way to your destination with parcel <strong>#{{ reference_number }}</strong>.</p>
+    
+    <div class="otp-card">
+      <div class="otp-subtitle">Your Delivery Verification Code (OTP)</div>
+      <div class="otp-code">{{ otp }}</div>
+      <div class="otp-note">Please share this 6-digit code with the courier agent only when you receive your package. Valid for 10 minutes.</div>
+    </div>
+
+    <div class="ref-box">
+      <strong>Delivery Address:</strong> {{ recipient_address }}<br>
+      {% if staff_name %}<strong>Delivery Agent:</strong> {{ staff_name }}{% endif %}
+    </div>
+
+    <div class="btn-container">
+      <a href="{{ tracking_url }}" class="btn">Live Track Parcel</a>
+    </div>
+  </div>
+  <div class="footer">
+    Never share your OTP with anyone over phone or email. Only provide it in person upon delivery.
+  </div>
+</div>
+</body>
+</html>

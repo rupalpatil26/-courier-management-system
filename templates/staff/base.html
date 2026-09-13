@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Staff Delivery Hub{% endblock %} - {{ system.name | default('Courier Management System') }}</title>
+  {% include 'partials/header.html' %}
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body.staff-body {
+      background-color: #0b1120 !important;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
+      color: #f1f5f9;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .staff-navbar {
+      background: rgba(15, 23, 42, 0.9) !important;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 0.75rem 1.5rem;
+    }
+    .staff-nav-link {
+      color: #94a3b8 !important;
+      font-weight: 500;
+      font-size: 0.95rem;
+      padding: 0.5rem 1rem !important;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .staff-nav-link:hover, .staff-nav-link.active {
+      color: #10b981 !important;
+      background: rgba(16, 185, 129, 0.1);
+    }
+    .glass-card {
+      background: rgba(30, 41, 59, 0.75);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    }
+    .btn-gradient-staff {
+      background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+      border: none;
+      color: #ffffff !important;
+      font-weight: 600;
+      border-radius: 8px;
+      padding: 0.6rem 1.4rem;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+      transition: all 0.2s ease;
+    }
+    .btn-gradient-staff:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+    }
+    .badge-status {
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+    .badge-delivered { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); }
+    .badge-transit { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+    .badge-pending { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .badge-failed { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+  </style>
+</head>
+<body class="staff-body">
+
+  <nav class="navbar navbar-expand-lg staff-navbar sticky-top">
+    <div class="container-fluid max-w-7xl">
+      <a class="navbar-brand d-flex align-items-center gap-2 text-white font-weight-bold" href="{{ url_for('staff.dashboard') }}">
+        <div style="width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(135deg, #059669, #10b981); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(16,185,129,0.3);">
+          <i class="fas fa-truck text-white"></i>
+        </div>
+        <span class="ml-2 font-weight-bold">{{ system.name | default('Courier CMS') }} <span class="badge badge-success ml-1" style="font-size: 0.7rem; background: rgba(16,185,129,0.2); color: #34d399; border: 1px solid rgba(16,185,129,0.4);">COURIER AGENT</span></span>
+      </a>
+
+      <button class="navbar-toggler text-white border-0" type="button" data-toggle="collapse" data-target="#staffNav">
+        <i class="fas fa-bars"></i>
+      </button>
+
+      <div class="collapse navbar-collapse" id="staffNav">
+        <ul class="navbar-nav mx-auto">
+          <li class="nav-item">
+            <a class="nav-link staff-nav-link {% if request.endpoint == 'staff.dashboard' %}active{% endif %}" href="{{ url_for('staff.dashboard') }}">
+              <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link staff-nav-link {% if request.endpoint == 'staff.deliveries' %}active{% endif %}" href="{{ url_for('staff.deliveries') }}">
+              <i class="fas fa-clipboard-list"></i> My Deliveries
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link staff-nav-link {% if request.endpoint == 'staff.scan_page' %}active{% endif %}" href="{{ url_for('staff.scan_page') }}">
+              <i class="fas fa-qrcode"></i> Scan Code
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link staff-nav-link" href="/dashboard?page=home">
+              <i class="fas fa-columns"></i> Admin Portal
+            </a>
+          </li>
+        </ul>
+
+        <ul class="navbar-nav align-items-center gap-2">
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle text-white d-flex align-items-center gap-2" href="#" id="staffUserMenu" data-toggle="dropdown">
+              <div style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #059669, #10b981); display: flex; align-items: center; justify-content: center; font-weight: 700;">
+                {{ session.get('login_name', 'Staff')[0]|upper }}
+              </div>
+              <span class="ml-2 font-weight-medium">{{ session.get('login_name', 'Courier Agent') }}</span>
+            </a>
+            <div class="dropdown-menu dropdown-menu-right" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+              <a class="dropdown-item text-light py-2" href="/dashboard?page=home">
+                <i class="fas fa-columns mr-2 text-info"></i> Full Dashboard
+              </a>
+              <div class="dropdown-divider" style="border-color: rgba(255,255,255,0.08);"></div>
+              <a class="dropdown-item text-danger py-2" href="/api/auth/logout">
+                <i class="fas fa-sign-out-alt mr-2"></i> Log Out
+              </a>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Flash Messages -->
+  <div class="container mt-3">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show glass-card" style="border-left: 4px solid #10b981;" role="alert">
+            <i class="fas fa-info-circle mr-2"></i> {{ message }}
+            <button type="button" class="close text-white" data-dismiss="alert">&times;</button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
+
+  <main class="flex-grow-1 py-4">
+    <div class="container">
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+
+  <footer class="py-3 text-center text-muted" style="border-top: 1px solid rgba(255,255,255,0.05); font-size: 0.85rem;">
+    &copy; 2026 {{ system.name | default('Courier Management System') }} - Delivery Personnel Hub
+  </footer>
+
+  {% include 'partials/footer.html' %}
+</body>
+</html>

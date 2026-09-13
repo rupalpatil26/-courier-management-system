@@ -1,0 +1,189 @@
+<!-- Dashboard Overview Cards -->
+{% if session.get('login_type') == 1 %}
+<div class="row">
+  <!-- 1. Total Branches -->
+  <div class="col-12 col-sm-6 col-lg-4">
+    <div class="stat-card theme-branches animate-card delay-1">
+      <div class="stat-card-header">
+        <div class="stat-card-info">
+          <span class="stat-card-label">Network Reach</span>
+          <span class="stat-card-value count-up" data-target="{{ metrics.total_branches }}">{{ metrics.total_branches }}</span>
+        </div>
+        <div class="stat-card-icon">
+          <i class="fas fa-city"></i>
+        </div>
+      </div>
+      <div class="stat-card-footer">
+        <span class="text-white-50 font-weight-bold">Total Branches</span>
+        <a href="/dashboard?page=branch_list">View details <i class="fas fa-arrow-right"></i></a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Total Parcels -->
+  <div class="col-12 col-sm-6 col-lg-4">
+    <div class="stat-card theme-parcels animate-card delay-2">
+      <div class="stat-card-header">
+        <div class="stat-card-info">
+          <span class="stat-card-label">Shipment Volume</span>
+          <span class="stat-card-value count-up" data-target="{{ metrics.total_parcels }}">{{ metrics.total_parcels }}</span>
+        </div>
+        <div class="stat-card-icon">
+          <i class="fas fa-boxes"></i>
+        </div>
+      </div>
+      <div class="stat-card-footer">
+        <span class="text-white-50 font-weight-bold">Total Parcels</span>
+        <a href="/dashboard?page=parcel_list">Manage parcels <i class="fas fa-arrow-right"></i></a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Total Staff -->
+  <div class="col-12 col-sm-6 col-lg-4">
+    <div class="stat-card theme-staff animate-card delay-3">
+      <div class="stat-card-header">
+        <div class="stat-card-info">
+          <span class="stat-card-label">Active Team</span>
+          <span class="stat-card-value count-up" data-target="{{ metrics.total_staff }}">{{ metrics.total_staff }}</span>
+        </div>
+        <div class="stat-card-icon">
+          <i class="fas fa-user-tie"></i>
+        </div>
+      </div>
+      <div class="stat-card-footer">
+        <span class="text-white-50 font-weight-bold">Total Staff</span>
+        <a href="/dashboard?page=staff_list">Staff directory <i class="fas fa-arrow-right"></i></a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Section: Live Shipment Lifecycle -->
+<div class="section-divider animate-card delay-4">
+  <h4><i class="fas fa-route mr-2 text-primary"></i> Live Shipment Lifecycle & Status</h4>
+</div>
+
+<div class="row">
+  {% set status_meta = {
+    0: {'icon': 'fas fa-clipboard-check', 'theme': 'theme-status-0', 'label': 'Inbound Intake'},
+    1: {'icon': 'fas fa-dolly-flatbed', 'theme': 'theme-status-1', 'label': 'Hub Collection'},
+    2: {'icon': 'fas fa-shipping-fast', 'theme': 'theme-status-2', 'label': 'Dispatched Transit'},
+    3: {'icon': 'fas fa-truck-moving', 'theme': 'theme-status-3', 'label': 'On The Road'},
+    4: {'icon': 'fas fa-warehouse', 'theme': 'theme-status-4', 'label': 'Destination Facility'},
+    5: {'icon': 'fas fa-motorcycle', 'theme': 'theme-status-5', 'label': 'Last Mile Courier'},
+    6: {'icon': 'fas fa-store-alt', 'theme': 'theme-status-6', 'label': 'Counter Pickup'},
+    7: {'icon': 'fas fa-check-double', 'theme': 'theme-status-7', 'label': 'Delivered to Recipient'},
+    8: {'icon': 'fas fa-handshake', 'theme': 'theme-status-8', 'label': 'Client Picked-up'},
+    9: {'icon': 'fas fa-exclamation-triangle', 'theme': 'theme-status-9', 'label': 'Requires Attention'}
+  } %}
+
+  {% for item in metrics.status_counts %}
+  {% set meta = status_meta.get(item.status_id, {'icon': 'fas fa-box', 'theme': 'theme-status-0', 'label': 'Status'}) %}
+  <div class="col-12 col-sm-6 col-lg-4">
+    <div class="stat-card {{ meta.theme }} animate-card delay-{{ loop.index + 3 }}">
+      <div class="stat-card-header">
+        <div class="stat-card-info">
+          <span class="stat-card-label">{{ meta.label }}</span>
+          <span class="stat-card-value count-up" data-target="{{ item.count }}">{{ item.count }}</span>
+        </div>
+        <div class="stat-card-icon">
+          <i class="{{ meta.icon }}"></i>
+        </div>
+      </div>
+      <div class="stat-card-footer">
+        <span class="text-white-50 font-weight-bold">{{ item.status_name }}</span>
+        <a href="/dashboard?page=parcel_list&s={{ item.status_id }}">View list <i class="fas fa-arrow-right"></i></a>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% else %}
+<!-- Staff User Welcome View -->
+<div class="row">
+  <div class="col-12">
+    <div class="stat-card theme-branches animate-card delay-1">
+      <div class="stat-card-header">
+        <div class="stat-card-info">
+          <span class="stat-card-label">Branch Representative</span>
+          <h2 class="text-white font-weight-bold mb-1">Welcome back, {{ session.get('login_name') }}!</h2>
+          <p class="text-muted mb-0">Manage parcels and shipments under your assigned branch location.</p>
+        </div>
+        <div class="stat-card-icon">
+          <i class="fas fa-id-badge"></i>
+        </div>
+      </div>
+      <div class="stat-card-footer">
+        <span class="text-white-50">Assigned Branch #{{ session.get('login_branch_id', '0') }}</span>
+        <a href="/dashboard?page=parcel_list">Go to Parcel List <i class="fas fa-arrow-right"></i></a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  {% set status_meta = {
+    0: {'icon': 'fas fa-clipboard-check', 'theme': 'theme-status-0', 'label': 'Inbound Intake'},
+    1: {'icon': 'fas fa-dolly-flatbed', 'theme': 'theme-status-1', 'label': 'Hub Collection'},
+    2: {'icon': 'fas fa-shipping-fast', 'theme': 'theme-status-2', 'label': 'Dispatched Transit'},
+    3: {'icon': 'fas fa-truck-moving', 'theme': 'theme-status-3', 'label': 'On The Road'},
+    4: {'icon': 'fas fa-warehouse', 'theme': 'theme-status-4', 'label': 'Destination Facility'},
+    5: {'icon': 'fas fa-motorcycle', 'theme': 'theme-status-5', 'label': 'Last Mile Courier'},
+    6: {'icon': 'fas fa-store-alt', 'theme': 'theme-status-6', 'label': 'Counter Pickup'},
+    7: {'icon': 'fas fa-check-double', 'theme': 'theme-status-7', 'label': 'Delivered to Recipient'},
+    8: {'icon': 'fas fa-handshake', 'theme': 'theme-status-8', 'label': 'Client Picked-up'},
+    9: {'icon': 'fas fa-exclamation-triangle', 'theme': 'theme-status-9', 'label': 'Requires Attention'}
+  } %}
+
+  {% for item in metrics.status_counts %}
+  {% set meta = status_meta.get(item.status_id, {'icon': 'fas fa-box', 'theme': 'theme-status-0', 'label': 'Status'}) %}
+  <div class="col-12 col-sm-6 col-lg-4">
+    <div class="stat-card {{ meta.theme }} animate-card delay-{{ loop.index }}">
+      <div class="stat-card-header">
+        <div class="stat-card-info">
+          <span class="stat-card-label">{{ meta.label }}</span>
+          <span class="stat-card-value count-up" data-target="{{ item.count }}">{{ item.count }}</span>
+        </div>
+        <div class="stat-card-icon">
+          <i class="{{ meta.icon }}"></i>
+        </div>
+      </div>
+      <div class="stat-card-footer">
+        <span class="text-white-50 font-weight-bold">{{ item.status_name }}</span>
+        <a href="/dashboard?page=parcel_list&s={{ item.status_id }}">View list <i class="fas fa-arrow-right"></i></a>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- Smooth Count-Up Animation Script -->
+<script>
+  $(document).ready(function(){
+    $('.count-up').each(function() {
+      var $this = $(this);
+      var target = parseInt($this.attr('data-target'), 10) || 0;
+      if (target === 0) {
+        $this.text('0');
+        return;
+      }
+      var count = 0;
+      var duration = 900; // ms
+      var stepTime = Math.max(Math.floor(duration / target), 20);
+      var increment = Math.ceil(target / (duration / stepTime));
+
+      var timer = setInterval(function() {
+        count += increment;
+        if (count >= target) {
+          $this.text(target);
+          clearInterval(timer);
+        } else {
+          $this.text(count);
+        }
+      }, stepTime);
+    });
+  });
+</script>

@@ -1,0 +1,156 @@
+<div class="col-lg-12">
+	<div class="card">
+		<div class="card-body">
+			<form action="" id="manage_user">
+				<input type="hidden" name="id" value="{{ user_item['id'] if user_item else '' }}">
+				<div class="row">
+					<div class="col-md-6 border-right">
+						<b class="text-muted">Personal Information</b>
+						<div class="form-group">
+							<label class="control-label">First Name</label>
+							<input type="text" name="firstname" class="form-control form-control-sm" required value="{{ user_item['firstname'] if user_item else '' }}">
+						</div>
+						<div class="form-group">
+							<label class="control-label">Last Name</label>
+							<input type="text" name="lastname" class="form-control form-control-sm" required value="{{ user_item['lastname'] if user_item else '' }}">
+						</div>
+					</div>
+					<div class="col-md-6">
+						<b class="text-muted">System Credentials</b>
+						<div class="form-group">
+							<label class="control-label">User Role</label>
+							<select name="type" id="type" class="custom-select custom-select-sm">
+								<option value="2" {% if user_item and user_item['type'] == 2 %}selected{% endif %}>Staff</option>
+								<option value="1" {% if user_item and user_item['type'] == 1 %}selected{% endif %}>Admin</option>
+							</select>
+						</div>
+						<div class="form-group">
+							<label class="control-label">Email</label>
+							<input type="email" class="form-control form-control-sm" name="email" required value="{{ user_item['email'] if user_item else '' }}">
+							<small id="msg"></small>
+						</div>
+						<div class="form-group">
+							<label class="control-label">Password</label>
+							<input type="password" class="form-control form-control-sm" name="password" {% if not user_item %}required{% endif %}>
+							{% if user_item %}
+							<small><i>Leave this blank if you don't want to change the password</i></small>
+							{% endif %}
+						</div>
+						<div class="form-group">
+							<label class="label control-label">Confirm Password</label>
+							<input type="password" class="form-control form-control-sm" name="cpass" {% if not user_item %}required{% endif %}>
+							<small id="pass_match" data-status=''></small>
+						</div>
+					</div>
+				</div>
+				<hr>
+				<div class="col-lg-12 text-right justify-content-center d-flex">
+					<button class="btn btn-primary mr-2">Save</button>
+					<button class="btn btn-secondary" type="button" onclick="location.href = '/dashboard?page=user_list'">Cancel</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+<script>
+	function validateEmailStr(email) {
+		if (!email) return { valid: false, message: "Email address is required." };
+		email = email.trim();
+		if (!email) return { valid: false, message: "Email address is required." };
+		if (/\s/.test(email)) return { valid: false, message: "Email address cannot contain spaces." };
+		var re = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}$/;
+		if (!re.test(email)) return { valid: false, message: "Please enter a valid email address (e.g. user@example.com)." };
+		return { valid: true };
+	}
+
+	$('[name="password"],[name="cpass"]').keyup(function(){
+		var pass = $('[name="password"]').val();
+		var cpass = $('[name="cpass"]').val();
+		if(cpass === '' || pass === ''){
+			$('#pass_match').attr('data-status','').html('');
+		}else{
+			if(cpass === pass){
+				$('#pass_match').attr('data-status','1').html('<i class="text-success fas fa-check-circle mr-1"></i> <span class="text-success">Password Matched.</span>');
+			}else{
+				$('#pass_match').attr('data-status','2').html('<i class="text-danger fas fa-times-circle mr-1"></i> <span class="text-danger">Password does not match.</span>');
+			}
+		}
+	});
+
+	$('#manage_user').submit(function(e){
+		e.preventDefault();
+		$('input').removeClass("is-invalid border-danger");
+		$('#msg').html('');
+
+		var firstname = $.trim($('[name="firstname"]').val());
+		var lastname = $.trim($('[name="lastname"]').val());
+		var email = $.trim($('[name="email"]').val());
+		var password = $('[name="password"]').val();
+		var cpass = $('[name="cpass"]').val();
+		var isNew = !$('[name="id"]').val();
+
+		var hasError = false;
+		function markError(selector, msg) {
+			$(selector).addClass('is-invalid');
+			if (!hasError) {
+				$('#msg').html('<div class="alert alert-danger mb-3 py-2"><i class="fas fa-exclamation-circle mr-1"></i> ' + msg + '</div>');
+				$(selector).focus();
+				hasError = true;
+			}
+		}
+
+		if (!firstname) markError('[name="firstname"]', 'First name is required.');
+		if (!lastname) markError('[name="lastname"]', 'Last name is required.');
+
+		var emVal = validateEmailStr(email);
+		if (!emVal.valid) markError('[name="email"]', emVal.message);
+
+		if (isNew && !password) {
+			markError('[name="password"]', 'Password is required for new accounts.');
+		} else if (password && password !== cpass) {
+			markError('[name="cpass"]', 'Passwords do not match.');
+		}
+
+		if (hasError) return false;
+
+		start_load();
+		$.ajax({
+			url: '/api/user/save',
+			data: new FormData($(this)[0]),
+			cache: false,
+			contentType: false,
+			processData: false,
+			method: 'POST',
+			type: 'POST',
+			success: function(resp){
+				var data = resp;
+				if (typeof resp === 'string') {
+					try { data = JSON.parse(resp); } catch(e) { data = resp; }
+				}
+
+				if(resp == 1 || (data && data.status === 'success')){
+					alert_toast('Data successfully saved.', "success");
+					setTimeout(function(){
+						location.replace('/dashboard?page=user_list');
+					}, 750);
+				} else if(resp == 2 || (data && data.message && data.message.indexOf('already exists') !== -1)){
+					$('#msg').html("<div class='alert alert-danger mb-3 py-2'><i class='fas fa-exclamation-triangle mr-1'></i> Email already exists.</div>");
+					$('[name="email"]').addClass("is-invalid").focus();
+					alert_toast('Email already exists.', "error");
+					end_load();
+				} else {
+					var errMsg = (data && data.message) ? data.message : 'An error occurred while saving the data.';
+					$('#msg').html("<div class='alert alert-danger mb-3 py-2'><i class='fas fa-exclamation-triangle mr-1'></i> " + errMsg + "</div>");
+					alert_toast(errMsg, "error");
+					end_load();
+				}
+			},
+			error: function(err){
+				console.error(err);
+				$('#msg').html("<div class='alert alert-danger mb-3 py-2'><i class='fas fa-exclamation-triangle mr-1'></i> An error occurred while saving.</div>");
+				alert_toast('An error occurred while saving.', "error");
+				end_load();
+			}
+		});
+	});
+</script>

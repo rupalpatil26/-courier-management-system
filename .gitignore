@@ -1,0 +1,103 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Environments & Secrets
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+ENV/
+env/
+env.bak/
+venv.bak/
+
+# Flask instance folder
+instance/
+.webassets-cache
+
+# macOS specific files
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows specific files
+Thumbs.db
+ehthumbs.db
+[Dd]esktop.ini
+
+# Linux temporary files
+*~
+
+# IDEs and Editors
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+
+# Node / Frontend build (if generated)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.parcel-cache/
+
+# Local credentials / secrets
+*.pem
+id_rsa*
+*.p12
+*.pfx

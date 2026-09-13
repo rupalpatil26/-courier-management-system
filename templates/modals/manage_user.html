@@ -1,0 +1,99 @@
+<div class="container-fluid">
+	<div id="msg"></div>
+	
+	<form action="" id="manage-user">	
+		<input type="hidden" name="id" value="{{ user.id if user else session.get('login_id', '') }}">
+		<div class="form-group">
+			<label for="firstname">First Name</label>
+			<input type="text" name="firstname" id="firstname" class="form-control" value="{{ user.firstname if user else session.get('login_firstname', '') }}" required>
+		</div>
+		<div class="form-group">
+			<label for="lastname">Last Name</label>
+			<input type="text" name="lastname" id="lastname" class="form-control" value="{{ user.lastname if user else session.get('login_lastname', '') }}" required>
+		</div>
+		<div class="form-group">
+			<label for="email">Email</label>
+			<input type="email" name="email" id="email" class="form-control" value="{{ user.email if user else session.get('login_email', '') }}" required autocomplete="off">
+		</div>
+		<div class="form-group">
+			<label for="password">Password</label>
+			<input type="password" name="password" id="password" class="form-control" value="" autocomplete="off">
+			<small><i>Leave this blank if you don't want to change the password.</i></small>
+		</div>
+	</form>
+</div>
+<script>
+	function validateEmailStr(email) {
+		if (!email) return { valid: false, message: "Email address is required." };
+		email = email.trim();
+		if (!email) return { valid: false, message: "Email address is required." };
+		if (/\s/.test(email)) return { valid: false, message: "Email address cannot contain spaces." };
+		var re = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}$/;
+		if (!re.test(email)) return { valid: false, message: "Please enter a valid email address." };
+		return { valid: true };
+	}
+
+	$('#manage-user').submit(function(e){
+		e.preventDefault();
+		$('#msg').html('');
+		$('.form-control').removeClass('is-invalid');
+
+		var fn = $.trim($('#firstname').val());
+		var ln = $.trim($('#lastname').val());
+		var em = $.trim($('#email').val());
+
+		if (!fn) {
+			$('#msg').html('<div class="alert alert-danger mb-3 py-2"><i class="fas fa-exclamation-circle mr-1"></i> First name is required.</div>');
+			$('#firstname').addClass('is-invalid').focus();
+			return false;
+		}
+		if (!ln) {
+			$('#msg').html('<div class="alert alert-danger mb-3 py-2"><i class="fas fa-exclamation-circle mr-1"></i> Last name is required.</div>');
+			$('#lastname').addClass('is-invalid').focus();
+			return false;
+		}
+		var emRes = validateEmailStr(em);
+		if (!emRes.valid) {
+			$('#msg').html('<div class="alert alert-danger mb-3 py-2"><i class="fas fa-exclamation-circle mr-1"></i> ' + emRes.message + '</div>');
+			$('#email').addClass('is-invalid').focus();
+			return false;
+		}
+
+		start_load();
+		$.ajax({
+			url: '/api/user/update',
+			data: new FormData($(this)[0]),
+			cache: false,
+			contentType: false,
+			processData: false,
+			method: 'POST',
+			type: 'POST',
+			success: function(resp){
+				var data = resp;
+				if (typeof resp === 'string') {
+					try { data = JSON.parse(resp); } catch(e) { data = resp; }
+				}
+
+				if(resp == 1 || resp == '1' || (data && data.status === 'success')){
+					alert_toast("Data successfully saved", 'success');
+					setTimeout(function(){
+						location.reload();
+					}, 1000);
+				} else if(resp == 2 || resp == '2' || (data && data.message && data.message.indexOf('already exists') !== -1)) {
+					$('#msg').html('<div class="alert alert-danger mb-3 py-2"><i class="fas fa-exclamation-triangle mr-1"></i> Email already exists.</div>');
+					$('#email').addClass('is-invalid').focus();
+					end_load();
+				} else {
+					var errMsg = (data && data.message) ? data.message : 'An error occurred while saving.';
+					$('#msg').html('<div class="alert alert-danger mb-3 py-2"><i class="fas fa-exclamation-triangle mr-1"></i> ' + errMsg + '</div>');
+					end_load();
+				}
+			},
+			error: function(err){
+				console.error(err);
+				$('#msg').html('<div class="alert alert-danger mb-3 py-2"><i class="fas fa-exclamation-triangle mr-1"></i> An error occurred while saving.</div>');
+				end_load();
+			}
+		});
+	});
+</script>

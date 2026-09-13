@@ -1,0 +1,2200 @@
+<!DOCTYPE html>
+<html lang="en-US" dir="ltr">
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>{{ system.name | default('Courier Management System') }} | Home</title>
+
+    <!-- Favicons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/landing_assets/img/favicons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/landing_assets/img/favicons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/landing_assets/img/favicons/favicon-16x16.png">
+    <link rel="shortcut icon" type="image/x-icon" href="/landing_assets/img/favicons/favicon.ico">
+    <meta name="theme-color" content="#ffffff">
+
+    <!-- Stylesheets -->
+    <link href="/landing_assets/css/theme.css" rel="stylesheet" />
+    <link rel="stylesheet" href="/assets/plugins/fontawesome-free/css/all.min.css">
+    <style>
+        /* ==========================================================================
+           Dark Theme Design System & Tokens
+           ========================================================================== */
+        :root {
+            --cms-dark-bg: #070b14;
+            --cms-dark-surface: #0b1120;
+            --cms-card-bg: rgba(15, 23, 42, 0.72);
+            --cms-card-border: rgba(255, 255, 255, 0.08);
+            --cms-orange: #ff6b2b;
+            --cms-orange-dark: #f95c19;
+            --cms-orange-glow: rgba(255, 107, 43, 0.45);
+            --cms-cyan: #00f0ff;
+            --cms-blue: #3b82f6;
+            --cms-indigo: #6366f1;
+            --cms-text-main: #f8fafc;
+            --cms-text-sub: #94a3b8;
+        }
+
+        html, body {
+            background-color: #070b14 !important;
+            color: #f1f5f9 !important;
+            font-family: 'Raleway', sans-serif !important;
+            overflow-x: hidden !important;
+        }
+
+        /* Modern Dark Navbar */
+        .cms-dark-navbar {
+            background: rgba(7, 11, 20, 0.9) !important;
+            backdrop-filter: blur(20px) !important;
+            -webkit-backdrop-filter: blur(20px) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.7) !important;
+            transition: all 0.3s ease !important;
+        }
+
+        .cms-dark-navbar .navbar-brand img {
+            filter: drop-shadow(0 0 10px rgba(255, 107, 43, 0.35));
+            transition: transform 0.3s ease;
+        }
+        .cms-dark-navbar .navbar-brand:hover img {
+            transform: scale(1.03);
+        }
+
+        .cms-dark-navbar .nav-link {
+            color: #cbd5e1 !important;
+            font-weight: 600 !important;
+            font-size: 0.95rem !important;
+            position: relative;
+            padding: 0.5rem 1rem !important;
+            transition: all 0.25s ease !important;
+        }
+
+        .cms-dark-navbar .nav-link:hover,
+        .cms-dark-navbar .nav-link:focus,
+        .cms-dark-navbar .nav-link.active {
+            color: #ffffff !important;
+            text-shadow: 0 0 12px rgba(255, 107, 43, 0.6);
+        }
+
+        .cms-dark-navbar .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            width: 0;
+            height: 2.5px;
+            background: linear-gradient(90deg, #ff6b2b, #00f0ff);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+
+        .cms-dark-navbar .nav-link:hover::after,
+        .cms-dark-navbar .nav-link.active::after {
+            width: 60%;
+        }
+
+        .cms-nav-btn {
+            background: linear-gradient(135deg, #ff6b2b 0%, #f95c19 100%) !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            font-size: 0.9rem !important;
+            border: 1px solid rgba(255, 107, 43, 0.4) !important;
+            padding: 0.55rem 1.75rem !important;
+            border-radius: 9999px !important;
+            box-shadow: 0 4px 20px rgba(249, 92, 25, 0.45) !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            text-decoration: none !important;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .cms-nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 28px rgba(249, 92, 25, 0.75), 0 0 18px rgba(255, 107, 43, 0.5) !important;
+            color: #ffffff !important;
+        }
+
+        .cms-nav-btn-outline {
+            background: rgba(15, 23, 42, 0.8) !important;
+            color: #ff8a4c !important;
+            border: 1px solid rgba(255, 107, 43, 0.4) !important;
+            font-weight: 600 !important;
+            font-size: 0.9rem !important;
+            padding: 0.55rem 1.5rem !important;
+            border-radius: 9999px !important;
+            transition: all 0.3s ease !important;
+            text-decoration: none !important;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .cms-nav-btn-outline:hover {
+            background: rgba(255, 107, 43, 0.15) !important;
+            color: #ffffff !important;
+            border-color: #ff6b2b !important;
+            box-shadow: 0 0 15px rgba(255, 107, 43, 0.3) !important;
+        }
+
+        .navbar-toggler {
+            border: 1px solid rgba(255, 255, 255, 0.15) !important;
+            background: rgba(15, 23, 42, 0.8) !important;
+            border-radius: 10px !important;
+            padding: 0.5rem 0.75rem !important;
+        }
+        .navbar-toggler:focus {
+            box-shadow: 0 0 0 3px rgba(255, 107, 43, 0.3) !important;
+        }
+        .navbar-toggler-icon {
+            filter: invert(1) brightness(1.8) !important;
+        }
+
+        @media (max-width: 991px) {
+            .navbar-collapse {
+                background: rgba(11, 17, 32, 0.98) !important;
+                border: 1px solid rgba(255, 255, 255, 0.1) !important;
+                border-radius: 16px !important;
+                padding: 1.25rem !important;
+                margin-top: 1rem !important;
+                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7) !important;
+            }
+        }
+
+        /* Hero Dark Section */
+        .hero-dark-section {
+            position: relative;
+            background-color: #070b14 !important;
+            background-image: 
+                radial-gradient(circle at 75% 25%, rgba(249, 92, 25, 0.16) 0%, transparent 45%),
+                radial-gradient(circle at 20% 70%, rgba(59, 130, 246, 0.14) 0%, transparent 45%),
+                radial-gradient(circle at 50% 50%, rgba(0, 240, 255, 0.05) 0%, transparent 60%) !important;
+            padding-top: 135px;
+            padding-bottom: 60px;
+            overflow: hidden;
+        }
+
+        .hero-dark-section::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: 
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+            background: rgba(255, 107, 43, 0.12);
+            border: 1px solid rgba(255, 107, 43, 0.35);
+            box-shadow: 0 0 20px rgba(255, 107, 43, 0.18);
+            padding: 0.4rem 1.1rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            color: #ff9d66;
+            margin-bottom: 1.25rem;
+        }
+
+        .hero-subheading {
+            color: #e2e8f0 !important;
+            font-weight: 300 !important;
+            letter-spacing: -0.01em;
+        }
+
+        .hero-gradient-text {
+            background: linear-gradient(135deg, #ffffff 15%, #ff9d66 60%, #f95c19 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+            font-weight: 800 !important;
+            filter: drop-shadow(0 4px 25px rgba(249, 92, 25, 0.35));
+        }
+
+        .hero-lead-text {
+            color: #94a3b8 !important;
+            font-size: 1.15rem !important;
+            line-height: 1.7;
+            max-width: 480px;
+        }
+
+        .hero-track-btn {
+            background: linear-gradient(135deg, #ff6b2b 0%, #f95c19 100%) !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            font-size: 1.05rem !important;
+            padding: 0.95rem 2.25rem !important;
+            border-radius: 9999px !important;
+            border: none !important;
+            box-shadow: 0 4px 25px rgba(249, 92, 25, 0.5), 0 0 35px rgba(249, 92, 25, 0.25) !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            display: inline-flex;
+            align-items: center;
+            text-decoration: none !important;
+        }
+
+        .hero-track-btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 35px rgba(249, 92, 25, 0.75), 0 0 50px rgba(249, 92, 25, 0.4) !important;
+            color: #ffffff !important;
+        }
+
+        /* Courier Stage Glow Aura */
+        .courier-stage-aura {
+            position: relative;
+            filter: drop-shadow(0 20px 45px rgba(0, 0, 0, 0.75));
+        }
+
+        .courier-stage-aura::before {
+            content: '';
+            position: absolute;
+            top: 15%;
+            left: 10%;
+            width: 80%;
+            height: 70%;
+            background: radial-gradient(circle, rgba(255, 107, 43, 0.22) 0%, rgba(59, 130, 246, 0.15) 45%, transparent 70%);
+            filter: blur(30px);
+            pointer-events: none;
+            z-index: 0;
+            animation: auraPulse 5s ease-in-out infinite alternate;
+        }
+
+        @keyframes auraPulse {
+            0% { transform: scale(0.92); opacity: 0.65; }
+            100% { transform: scale(1.08); opacity: 1; }
+        }
+
+        .courier-floating-chip {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(15, 23, 42, 0.88);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 240, 255, 0.35);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 240, 255, 0.2);
+            border-radius: 9999px;
+            padding: 0.5rem 1.1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            z-index: 5;
+            animation: floatChip 4s ease-in-out infinite alternate;
+        }
+
+        @keyframes floatChip {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-7px); }
+        }
+
+        .pulse-dot-green {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background-color: #10b981;
+            box-shadow: 0 0 10px #10b981;
+            display: inline-block;
+            animation: dotGlow 1.5s infinite;
+        }
+
+        @keyframes dotGlow {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.8); }
+        }
+
+        /* Quick Statistics Cards */
+        .cms-stats-section {
+            background-color: #070b14 !important;
+            padding: 1rem 0 3.5rem 0;
+            position: relative;
+            z-index: 2;
+        }
+
+        .cms-stat-card {
+            background: rgba(15, 23, 42, 0.72);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 18px;
+            padding: 1.4rem 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 1.1rem;
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.6);
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .cms-stat-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 100% 0%, var(--card-glow, rgba(255, 107, 43, 0.15)) 0%, transparent 60%);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.35s ease;
+        }
+
+        .cms-stat-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--card-border-hover, rgba(255, 107, 43, 0.5));
+            box-shadow: 0 16px 35px -5px rgba(0, 0, 0, 0.75), 0 0 25px var(--card-glow, rgba(255, 107, 43, 0.25));
+        }
+
+        .cms-stat-card:hover::after {
+            opacity: 1;
+        }
+
+        .cms-stat-icon-wrap {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.35rem;
+            flex-shrink: 0;
+            background: var(--icon-bg, rgba(255, 107, 43, 0.15));
+            color: var(--icon-color, #ff8a4c);
+            border: 1px solid var(--icon-border, rgba(255, 107, 43, 0.3));
+            box-shadow: 0 0 15px var(--icon-glow, rgba(255, 107, 43, 0.2));
+            transition: transform 0.35s ease;
+        }
+
+        .cms-stat-card:hover .cms-stat-icon-wrap {
+            transform: scale(1.1) rotate(4deg);
+        }
+
+        .cms-stat-val {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #ffffff;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+        }
+
+        .cms-stat-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #94a3b8;
+            margin-top: 0.25rem;
+        }
+
+        /* Services Dark Section */
+        .services-dark-section {
+            background-color: #080c16 !important;
+            background-image: 
+                radial-gradient(at 0% 100%, rgba(59, 130, 246, 0.08) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(255, 107, 43, 0.08) 0px, transparent 50%) !important;
+            color: #f1f5f9;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 5.5rem 0;
+        }
+
+        .services-badge {
+            color: #ff6b2b !important;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+            display: inline-block;
+        }
+
+        .services-heading {
+            color: #ffffff !important;
+            font-weight: 800;
+            font-size: 2.25rem;
+            letter-spacing: -0.02em;
+            margin-bottom: 1rem;
+        }
+
+        .service-glass-card {
+            background: rgba(15, 23, 42, 0.65) !important;
+            backdrop-filter: blur(16px) !important;
+            -webkit-backdrop-filter: blur(16px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            border-radius: 22px !important;
+            padding: 2.5rem 2rem !important;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .service-glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, rgba(255, 107, 43, 0.6), transparent);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .service-glass-card:hover {
+            transform: translateY(-8px) !important;
+            border-color: rgba(255, 107, 43, 0.4) !important;
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.75), 0 0 25px rgba(255, 107, 43, 0.25) !important;
+        }
+
+        .service-glass-card:hover::before {
+            opacity: 1;
+        }
+
+        .service-icon-bubble {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(255, 107, 43, 0.15), rgba(59, 130, 246, 0.15));
+            border: 1px solid rgba(255, 107, 43, 0.25);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 107, 43, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.75rem auto;
+            transition: transform 0.4s ease;
+        }
+
+        .service-glass-card:hover .service-icon-bubble {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .service-title {
+            color: #ffffff !important;
+            font-weight: 700;
+            font-size: 1.35rem;
+            margin-bottom: 0.9rem;
+        }
+
+        .service-desc {
+            color: #94a3b8 !important;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .service-feature-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            text-align: left;
+        }
+
+        .service-feature-item {
+            color: #cbd5e1;
+            font-size: 0.9rem;
+            margin-bottom: 0.65rem;
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+        }
+
+        .service-bullet-icon {
+            color: #ff6b2b;
+            font-size: 0.55rem;
+            filter: drop-shadow(0 0 6px rgba(255, 107, 43, 0.8));
+        }
+
+        /* Footer & Find Us Dark Section */
+        .footer-dark-section {
+            background-color: #050811 !important;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            padding-top: 4.5rem;
+            padding-bottom: 2rem;
+            color: #94a3b8;
+        }
+
+        .footer-dark-section a {
+            color: #94a3b8 !important;
+            text-decoration: none;
+            transition: all 0.25s ease;
+        }
+
+        .footer-dark-section a:hover {
+            color: #ff8a4c !important;
+            padding-left: 4px;
+        }
+
+        .footer-contact-item {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            margin-bottom: 0.95rem;
+            color: #cbd5e1;
+            font-size: 0.95rem;
+        }
+
+        .footer-icon-wrap {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: rgba(255, 107, 43, 0.12);
+            border: 1px solid rgba(255, 107, 43, 0.25);
+            color: #ff8a4c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.95rem;
+            flex-shrink: 0;
+        }
+
+        .copyright-dark-bar {
+            background-color: #030509 !important;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            padding: 1.25rem 0;
+            color: #64748b;
+            font-size: 0.85rem;
+        }
+
+        /* ==========================================================================
+           Parcel Tracking - Dark Modern Glassmorphism & Neon Theme
+           ========================================================================== */
+        .tracking-landing-section {
+            background-color: #070b14 !important;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.12) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.1) 0px, transparent 50%),
+                radial-gradient(circle at 50% 10%, rgba(255, 107, 43, 0.08) 0px, transparent 40%) !important;
+            color: #f8fafc;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .tracking-search-card {
+            background: rgba(17, 24, 39, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.6), 0 0 25px rgba(59, 130, 246, 0.12);
+            padding: 2.25rem 1.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .tracking-search-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .tracking-badge-pill {
+            display: inline-flex;
+            align-items: center;
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            padding: 0.35rem 0.9rem;
+            border-radius: 9999px;
+            background: rgba(0, 240, 255, 0.1);
+            color: #00f0ff;
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.15);
+        }
+
+        .tracking-title {
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 2.2rem;
+            letter-spacing: -0.025em;
+            margin-bottom: 0.4rem;
+        }
+
+        .tracking-subtitle {
+            color: #94a3b8;
+            font-size: 1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .tracking-input-group {
+            border-radius: 14px;
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid rgba(99, 102, 241, 0.35);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .tracking-input-group:focus-within {
+            border-color: #00f0ff;
+            box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.2), 0 0 25px rgba(59, 130, 246, 0.3);
+        }
+
+        .tracking-input-icon {
+            background: transparent !important;
+            border: none !important;
+            color: #64748b !important;
+            padding-left: 1.25rem;
+            font-size: 1.1rem;
+        }
+
+        .tracking-input {
+            background: transparent !important;
+            border: none !important;
+            color: #ffffff !important;
+            font-size: 1.05rem;
+            font-weight: 600;
+            padding: 0.85rem 1rem;
+        }
+
+        .tracking-input::placeholder {
+            color: #64748b;
+            font-weight: 400;
+        }
+
+        .tracking-input:focus {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+        .tracking-btn {
+            background: linear-gradient(135deg, #ff6b2b 0%, #f95c19 100%) !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            font-size: 1rem !important;
+            border: none !important;
+            padding: 0.85rem 1.85rem !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            box-shadow: 0 4px 18px rgba(249, 92, 25, 0.45);
+        }
+
+        .tracking-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(249, 92, 25, 0.7), 0 0 20px rgba(255, 107, 43, 0.5) !important;
+        }
+
+        /* Quick test badges */
+        .sample-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .sample-badge {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #e2e8f0;
+            font-size: 0.82rem;
+            font-weight: 600;
+            padding: 0.4rem 0.85rem;
+            border-radius: 9999px;
+            cursor: pointer;
+            margin: 0 0.25rem 0.35rem 0;
+            transition: all 0.25s ease;
+        }
+
+        .sample-badge:hover {
+            background: rgba(255, 107, 43, 0.15);
+            border-color: rgba(255, 107, 43, 0.5);
+            color: #ff9d66;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 107, 43, 0.25);
+        }
+
+        .badge-sub {
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+
+        /* 2. Parcel Meta Overview Bar */
+        .tracking-meta-card {
+            background: rgba(17, 24, 39, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .meta-icon-box {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: rgba(0, 240, 255, 0.12);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .meta-label {
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: #64748b;
+            letter-spacing: 0.08em;
+            display: block;
+        }
+
+        .meta-ref {
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+            letter-spacing: 0.04em;
+        }
+
+        .meta-status-pill {
+            display: inline-block;
+            font-size: 0.82rem;
+            font-weight: 700;
+            padding: 0.25rem 0.85rem;
+            border-radius: 9999px;
+            background: rgba(16, 185, 129, 0.18);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.35);
+        }
+
+        .meta-badge-count {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #94a3b8;
+            background: rgba(255, 255, 255, 0.06);
+            padding: 0.35rem 0.8rem;
+            border-radius: 8px;
+        }
+
+        /* 3. Empty State Card */
+        .tracking-empty-card {
+            background: rgba(17, 24, 39, 0.55);
+            backdrop-filter: blur(12px);
+            border: 1px dashed rgba(255, 255, 255, 0.12);
+            border-radius: 18px;
+        }
+
+        .empty-icon-wrap {
+            width: 76px;
+            height: 76px;
+            margin: 0 auto;
+            border-radius: 50%;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            color: #38bdf8;
+            box-shadow: 0 0 25px rgba(59, 130, 246, 0.2);
+            animation: radarPulse 3s infinite ease-in-out;
+        }
+
+        @keyframes radarPulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+            }
+            50% {
+                transform: scale(1.06);
+                box-shadow: 0 0 35px rgba(0, 240, 255, 0.4);
+            }
+        }
+
+        .empty-hint-pill {
+            font-size: 0.82rem;
+            color: #94a3b8;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 0.5rem 1.25rem;
+            border-radius: 9999px;
+        }
+
+        /* 4. Modern Animated Vertical Timeline */
+        .modern-timeline {
+            position: relative;
+            padding: 1rem 0 1.5rem 3.25rem;
+        }
+
+        .modern-timeline::before {
+            content: '';
+            position: absolute;
+            top: 1.5rem;
+            bottom: 1.5rem;
+            left: 1.45rem;
+            width: 3px;
+            background: linear-gradient(180deg, #00f0ff 0%, #3b82f6 35%, #8b5cf6 75%, rgba(139, 92, 246, 0.2) 100%);
+            border-radius: 9999px;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        }
+
+        .modern-tl-item {
+            position: relative;
+            margin-bottom: 1.6rem;
+            opacity: 0;
+            transform: translateY(15px);
+            animation: tlItemFadeIn 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes tlItemFadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modern-tl-node {
+            position: absolute;
+            left: -3.25rem;
+            top: 0.75rem;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: #ffffff;
+            background: #111827;
+            border: 2px solid var(--node-color, #3b82f6);
+            box-shadow: 0 0 15px var(--node-glow, rgba(59, 130, 246, 0.4));
+            z-index: 2;
+            transition: all 0.3s ease;
+        }
+
+        .modern-tl-item.is-current .modern-tl-node {
+            border-width: 3px;
+            animation: pulseNodeRing 2s infinite;
+        }
+
+        @keyframes pulseNodeRing {
+            0% {
+                box-shadow: 0 0 0 0 rgba(0, 240, 255, 0.7), 0 0 20px rgba(0, 240, 255, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 12px rgba(0, 240, 255, 0), 0 0 25px rgba(0, 240, 255, 0.6);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(0, 240, 255, 0), 0 0 20px rgba(0, 240, 255, 0.4);
+            }
+        }
+
+        .modern-tl-card {
+            background: rgba(17, 24, 39, 0.75);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 1.25rem 1.4rem;
+            box-shadow: 0 8px 25px -4px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .modern-tl-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--node-gradient, linear-gradient(180deg, #3b82f6, #8b5cf6));
+            opacity: 0.8;
+        }
+
+        .modern-tl-item:hover .modern-tl-card {
+            transform: translateY(-3px) scale(1.008);
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 14px 30px -4px rgba(0, 0, 0, 0.6), 0 0 20px rgba(59, 130, 246, 0.2);
+        }
+
+        .modern-tl-item.is-current .modern-tl-card {
+            background: linear-gradient(135deg, rgba(24, 34, 53, 0.85) 0%, rgba(15, 23, 42, 0.9) 100%);
+            border-color: rgba(0, 240, 255, 0.45);
+            box-shadow: 0 10px 30px -4px rgba(0, 0, 0, 0.6), 0 0 25px rgba(0, 240, 255, 0.2);
+        }
+
+        .tl-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+
+        .tl-status-title {
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 1.15rem;
+            margin: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .tl-time-badge {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #94a3b8;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.25rem 0.65rem;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+
+        .tl-status-desc {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 0.6rem;
+        }
+
+        .tl-status-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.78rem;
+        }
+
+        .tl-badge-completed {
+            color: #10b981;
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            padding: 0.18rem 0.55rem;
+            border-radius: 9999px;
+            font-weight: 700;
+        }
+
+        .tl-badge-active {
+            color: #00f0ff;
+            background: rgba(0, 240, 255, 0.12);
+            border: 1px solid rgba(0, 240, 255, 0.4);
+            padding: 0.2rem 0.65rem;
+            border-radius: 9999px;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .pulse-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #00f0ff;
+            display: inline-block;
+            margin-right: 6px;
+            box-shadow: 0 0 8px #00f0ff;
+            animation: pulseDotAnim 1.4s infinite;
+        }
+
+        @keyframes pulseDotAnim {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.4); opacity: 0.5; }
+        }
+
+        /* 5. Route Visualizer Card */
+        .route-visualizer-card {
+            background: rgba(17, 24, 39, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            border-radius: 18px;
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            top: 85px;
+        }
+
+        .card-header-gradient {
+            background: rgba(15, 23, 42, 0.85);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 1rem 1.25rem;
+            font-size: 0.95rem;
+        }
+
+        .badge-route-live {
+            background: rgba(0, 240, 255, 0.15);
+            color: #00f0ff;
+            border: 1px solid rgba(0, 240, 255, 0.35);
+            padding: 0.25rem 0.6rem;
+            border-radius: 9999px;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            font-size: 0.72rem;
+        }
+
+        .route-body {
+            padding: 1.5rem 1.25rem;
+        }
+
+        .route-graphic-stage {
+            position: relative;
+            padding: 1rem 0 1rem 2rem;
+        }
+
+        .route-line-bg {
+            position: absolute;
+            top: 1.5rem;
+            bottom: 1.5rem;
+            left: 2.85rem;
+            width: 4px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 9999px;
+        }
+
+        .route-line-active {
+            position: absolute;
+            top: 1.5rem;
+            height: 0%;
+            left: 2.85rem;
+            width: 4px;
+            background: linear-gradient(180deg, #00f0ff, #3b82f6, #10b981);
+            border-radius: 9999px;
+            box-shadow: 0 0 12px rgba(0, 240, 255, 0.5);
+            transition: height 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .route-stop {
+            position: relative;
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+            z-index: 2;
+        }
+
+        .route-stop:last-child {
+            margin-bottom: 0;
+        }
+
+        .stop-node {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #111827;
+            border: 2px solid #475569;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            margin-right: 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .route-stop.active .stop-node {
+            border-color: #00f0ff;
+            color: #ffffff;
+            background: #0284c7;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
+        }
+
+        .route-stop.completed .stop-node {
+            border-color: #10b981;
+            color: #ffffff;
+            background: #059669;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+        }
+
+        .stop-title {
+            display: block;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .stop-desc {
+            display: block;
+            font-size: 0.78rem;
+            color: #94a3b8;
+        }
+
+        .moving-courier-truck {
+            position: absolute;
+            left: 2.3rem;
+            top: 1.5rem;
+            transform: translateY(0);
+            transition: top 1s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 3;
+        }
+
+        .truck-box {
+            width: 22px;
+            height: 22px;
+            background: #f59e0b;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            color: #111827;
+            box-shadow: 0 0 12px rgba(245, 158, 11, 0.7);
+            animation: truckBounce 1.5s infinite ease-in-out;
+        }
+
+        @keyframes truckBounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        .logistics-info-box {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 0.85rem 1rem;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.35rem 0;
+            font-size: 0.82rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: #94a3b8;
+        }
+
+        .info-val {
+            font-weight: 700;
+        }
+
+        .courier-mini-badge {
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+        }
+
+        .mini-icon-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: rgba(59, 130, 246, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        .text-cyan {
+            color: #00f0ff !important;
+        }
+
+        @media (max-width: 768px) {
+            .tracking-title {
+                font-size: 1.75rem;
+            }
+            .modern-timeline {
+                padding-left: 2.75rem;
+            }
+            .modern-tl-node {
+                width: 36px;
+                height: 36px;
+                font-size: 0.95rem;
+                left: -2.75rem;
+            }
+            .modern-timeline::before {
+                left: 1.15rem;
+            }
+            .tracking-btn {
+                padding: 0.75rem 1.25rem !important;
+                font-size: 0.9rem !important;
+            }
+        }
+
+        /* ==========================================================================
+           Continuous Looping Animated Courier Scene
+           ========================================================================== */
+        .courier-animated-scene-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 959px;
+            margin: 0 auto;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .courier-animated-stage {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 959 / 518;
+            overflow: visible;
+        }
+        .courier-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            pointer-events: none;
+            will-change: transform;
+        }
+        .courier-layer-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        /* 1. Scooter: Subtle Idle Suspension & Engine Motion */
+        .layer-scooter-wrap {
+            transform-origin: 24% 95%;
+            animation: scooterIdle 2.5s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+            will-change: transform;
+        }
+        @keyframes scooterIdle {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+            20% {
+                transform: translateY(-2.2px) rotate(-0.3deg);
+            }
+            45% {
+                transform: translateY(0.6px) rotate(0.18deg);
+            }
+            70% {
+                transform: translateY(-1.2px) rotate(-0.15deg);
+            }
+            85% {
+                transform: translateY(0.2px) rotate(0.06deg);
+            }
+        }
+
+        /* Headlight subtle glow */
+        .scooter-headlight-glow {
+            position: absolute;
+            top: 45.5%;
+            left: 41.5%;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(254, 208, 120, 0.5) 45%, transparent 75%);
+            filter: blur(2px);
+            animation: headlightPulse 2.5s ease-in-out infinite;
+            pointer-events: none;
+        }
+        @keyframes headlightPulse {
+            0%, 100% {
+                opacity: 0.5;
+                transform: scale(0.9);
+            }
+            50% {
+                opacity: 0.95;
+                transform: scale(1.2);
+            }
+        }
+
+        /* 2. Courier Torso: Natural Delivery Lean & Breathing */
+        .layer-courier-torso {
+            transform-origin: 57.5% 44%;
+            animation: courierDeliveryBreath 4.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+            will-change: transform;
+        }
+        @keyframes courierDeliveryBreath {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+            25% {
+                transform: translateY(-1.2px) rotate(0.9deg);
+            }
+            55% {
+                transform: translateY(-0.6px) rotate(0.5deg);
+            }
+            75% {
+                transform: translateY(0.2px) rotate(0.15deg);
+            }
+        }
+
+        /* 3. Parcels: Active Handoff Buoyancy */
+        .layer-parcels {
+            transform-origin: 66% 35%;
+            animation: parcelsHandoff 4.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+            will-change: transform;
+        }
+        @keyframes parcelsHandoff {
+            0%, 100% {
+                transform: translate(0px, 0px) rotate(0deg);
+            }
+            25% {
+                transform: translate(2.6px, -3.2px) rotate(0.65deg);
+            }
+            55% {
+                transform: translate(1.8px, -1.8px) rotate(0.3deg);
+            }
+            75% {
+                transform: translate(0.8px, -0.6px) rotate(0.1deg);
+            }
+        }
+
+        /* 4. Recipient Torso: Welcoming Lean & Receiving Hands */
+        .layer-recipient-torso {
+            transform-origin: 82.5% 44%;
+            animation: recipientReceiving 4.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+            will-change: transform;
+        }
+        @keyframes recipientReceiving {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+            28% {
+                transform: translateY(-1.8px) rotate(-0.8deg);
+            }
+            60% {
+                transform: translateY(-1px) rotate(-0.4deg);
+            }
+            80% {
+                transform: translateY(0.2px) rotate(-0.1deg);
+            }
+        }
+
+        /* 5. Cloud Left: Smooth Horizontal Sky Drift */
+        .layer-cloud-left {
+            transform-origin: 42% 22%;
+            animation: cloudDriftLeft 7.8s ease-in-out infinite alternate;
+            will-change: transform;
+        }
+        @keyframes cloudDriftLeft {
+            0% {
+                transform: translateX(-4px);
+            }
+            100% {
+                transform: translateX(10px);
+            }
+        }
+
+        /* 6. Cloud Right: Smooth Counter Drift */
+        .layer-cloud-right {
+            transform-origin: 97% 63%;
+            animation: cloudDriftRight 6.8s ease-in-out infinite alternate;
+            will-change: transform;
+        }
+        @keyframes cloudDriftRight {
+            0% {
+                transform: translateX(4px);
+            }
+            100% {
+                transform: translateX(-8px);
+            }
+        }
+
+        /* 7. Stars: Twinkling Shimmer */
+        .layer-stars {
+            animation: starsTwinkle 3.2s ease-in-out infinite;
+            will-change: transform, opacity;
+        }
+        @keyframes starsTwinkle {
+            0%, 100% {
+                opacity: 0.65;
+                transform: scale(0.92);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.16);
+                filter: drop-shadow(0 0 6px rgba(84, 80, 132, 0.55));
+            }
+        }
+
+        /* 8. Ambient Particles: Golden Dust Float */
+        .layer-particles {
+            animation: particlesFloat 4.2s ease-in-out infinite;
+            will-change: transform, opacity;
+        }
+        @keyframes particlesFloat {
+            0%, 100% {
+                transform: translateY(0px);
+                opacity: 0.75;
+            }
+            50% {
+                transform: translateY(-6px);
+                opacity: 1;
+                filter: drop-shadow(0 0 4px rgba(255, 208, 120, 0.65));
+            }
+        }
+
+        /* Ground & Stationary Legs remain rock-solid */
+        .layer-ground,
+        .layer-courier-legs,
+        .layer-recipient-legs {
+            transform: none !important;
+        }
+    </style>
+  </head>
+
+  <body>
+
+    <!-- Main Content -->
+    <main class="main" id="top">
+      <nav class="navbar navbar-expand-lg navbar-dark fixed-top py-3 d-block cms-dark-navbar" data-navbar-dark-on-scroll="dark">
+        <div class="container">
+          <a class="navbar-brand" href="/"><img src="/landing_assets/img/gallery/logo.png" height="45" alt="logo" /></a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"> </span></button>
+          <div class="collapse navbar-collapse border-top border-lg-0 mt-4 mt-lg-0" id="navbarSupportedContent">
+            <ul class="navbar-nav ms-auto pt-2 pt-lg-0 font-base">
+              <li class="nav-item px-2"><a class="nav-link" aria-current="page" href="/">Home</a></li>
+              <li class="nav-item px-2"><a class="nav-link" href="#services">Our Services</a></li>
+              <li class="nav-item px-2"><a class="nav-link" href="#track">Track Parcel</a></li>
+              <li class="nav-item px-2"><a class="nav-link" href="#findUs">Find Us</a></li>
+            </ul>
+            {% if session.get('login_id') %}
+                <a class="btn cms-nav-btn order-1 order-lg-0 ms-lg-3" href="/dashboard?page=home"><i class="fas fa-th-large me-2"></i>Dashboard</a>
+                <a class="btn cms-nav-btn-outline order-1 order-lg-0 ms-lg-2" href="/api/auth/logout"><i class="fas fa-sign-out-alt me-1"></i>Logout</a>
+            {% else %}
+                <a class="btn cms-nav-btn order-1 order-lg-0 ms-lg-3" href="/login"><i class="fas fa-user-circle me-2"></i>Login</a>
+            {% endif %}
+          </div>
+        </div>
+      </nav>
+
+      <!-- Hero Section - Dark Modern Theme -->
+      <section class="hero-dark-section" id="home">
+        <div class="container position-relative" style="z-index: 2;">
+          <div class="row align-items-center">
+            <div class="col-md-5 col-xl-6 col-xxl-7 order-0 order-md-1 text-end">
+              <!-- Animated Courier Delivering Scene with Glowing Aura -->
+              <div class="courier-animated-scene-wrapper courier-stage-aura pt-4 pt-md-0 w-100">
+                <div class="courier-animated-stage" role="img" aria-label="Animated Courier Delivering Parcel to Customer">
+                  <!-- Ground Baseline -->
+                  <img src="/landing_assets/img/illustrations/hero_layers/ground.png" class="courier-layer layer-ground" alt="">
+                  <!-- Atmospheric Clouds -->
+                  <img src="/landing_assets/img/illustrations/hero_layers/cloud_left.png" class="courier-layer layer-cloud-left" alt="">
+                  <img src="/landing_assets/img/illustrations/hero_layers/cloud_right.png" class="courier-layer layer-cloud-right" alt="">
+                  <!-- Ambient Sparkles & Golden Energy Dust -->
+                  <img src="/landing_assets/img/illustrations/hero_layers/stars.png" class="courier-layer layer-stars" alt="">
+                  <img src="/landing_assets/img/illustrations/hero_layers/particles.png" class="courier-layer layer-particles" alt="">
+                  <!-- Delivery Scooter (Suspension & Engine Idle Animation) -->
+                  <div class="courier-layer-container layer-scooter-wrap">
+                    <img src="/landing_assets/img/illustrations/hero_layers/scooter.png" class="courier-layer layer-scooter" alt="Delivery Scooter">
+                    <div class="scooter-headlight-glow"></div>
+                  </div>
+                  <!-- Courier Delivery Person (Legs Anchor & Natural Torso Movement) -->
+                  <img src="/landing_assets/img/illustrations/hero_layers/courier_legs.png" class="courier-layer layer-courier-legs" alt="Courier Legs">
+                  <img src="/landing_assets/img/illustrations/hero_layers/courier_torso.png" class="courier-layer layer-courier-torso" alt="Courier Torso">
+                  <!-- Active Parcels Handoff Motion -->
+                  <img src="/landing_assets/img/illustrations/hero_layers/parcels.png" class="courier-layer layer-parcels" alt="Parcels">
+                  <!-- Recipient Person (Legs Anchor & Welcoming Receiving Motion) -->
+                  <img src="/landing_assets/img/illustrations/hero_layers/recipient_legs.png" class="courier-layer layer-recipient-legs" alt="Recipient Legs">
+                  <img src="/landing_assets/img/illustrations/hero_layers/recipient_torso.png" class="courier-layer layer-recipient-torso" alt="Recipient Torso">
+                </div>
+                <!-- Floating Real-Time Status Badge -->
+                <div class="courier-floating-chip d-none d-sm-inline-flex">
+                  <span class="pulse-dot-green"></span>
+                  <span class="text-white font-weight-bold fs--1">Active Express Dispatch</span>
+                  <span class="badge bg-primary fs--2 text-white ms-1">LIVE</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-7 col-xl-6 col-xxl-5 text-md-start text-center py-5">
+              <div class="hero-badge">
+                <i class="fas fa-bolt text-warning"></i>
+                <span>NEXT-GEN LOGISTICS PLATFORM</span>
+              </div>
+              <h1 class="hero-subheading fs-5 fs-xxl-6 mb-1">A trusted provider of</h1>
+              <h1 class="hero-gradient-text fs-6 fs-xxl-7 mb-3">courier services.</h1>
+              <p class="hero-lead-text mb-4">
+                We deliver your consignments safely to your doorstep with precision GPS monitoring, intelligent branch routing, and verified chain-of-custody.
+              </p>
+              <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-start gap-3">
+                <a class="btn hero-track-btn" href="#track" role="button">
+                  <i class="fas fa-satellite-dish me-2"></i>Track Your Parcel
+                  <i class="fas fa-arrow-right ms-2"></i>
+                </a>
+                <a class="btn cms-nav-btn-outline ms-2" href="#services" role="button">
+                  <i class="fas fa-cubes me-2"></i>Our Services
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quick Logistics Statistics Bar -->
+      <section class="cms-stats-section">
+        <div class="container">
+          <div class="row g-3">
+            <div class="col-6 col-lg-3">
+              <div class="cms-stat-card" style="--card-glow: rgba(255, 107, 43, 0.2); --card-border-hover: rgba(255, 107, 43, 0.5);">
+                <div class="cms-stat-icon-wrap" style="--icon-bg: rgba(255, 107, 43, 0.15); --icon-color: #ff8a4c; --icon-border: rgba(255, 107, 43, 0.35); --icon-glow: rgba(255, 107, 43, 0.3);">
+                  <i class="fas fa-building"></i>
+                </div>
+                <div>
+                  <div class="cms-stat-val">50+</div>
+                  <div class="cms-stat-title">Nationwide Hubs</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-6 col-lg-3">
+              <div class="cms-stat-card" style="--card-glow: rgba(0, 240, 255, 0.2); --card-border-hover: rgba(0, 240, 255, 0.5);">
+                <div class="cms-stat-icon-wrap" style="--icon-bg: rgba(0, 240, 255, 0.15); --icon-color: #00f0ff; --icon-border: rgba(0, 240, 255, 0.35); --icon-glow: rgba(0, 240, 255, 0.3);">
+                  <i class="fas fa-box-check"></i>
+                </div>
+                <div>
+                  <div class="cms-stat-val">1.2M+</div>
+                  <div class="cms-stat-title">Parcels Handled</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-6 col-lg-3">
+              <div class="cms-stat-card" style="--card-glow: rgba(59, 130, 246, 0.2); --card-border-hover: rgba(59, 130, 246, 0.5);">
+                <div class="cms-stat-icon-wrap" style="--icon-bg: rgba(59, 130, 246, 0.15); --icon-color: #60a5fa; --icon-border: rgba(59, 130, 246, 0.35); --icon-glow: rgba(59, 130, 246, 0.3);">
+                  <i class="fas fa-shipping-fast"></i>
+                </div>
+                <div>
+                  <div class="cms-stat-val">24-48h</div>
+                  <div class="cms-stat-title">Express Delivery</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-6 col-lg-3">
+              <div class="cms-stat-card" style="--card-glow: rgba(16, 185, 129, 0.2); --card-border-hover: rgba(16, 185, 129, 0.5);">
+                <div class="cms-stat-icon-wrap" style="--icon-bg: rgba(16, 185, 129, 0.15); --icon-color: #34d399; --icon-border: rgba(16, 185, 129, 0.35); --icon-glow: rgba(16, 185, 129, 0.3);">
+                  <i class="fas fa-shield-alt"></i>
+                </div>
+                <div>
+                  <div class="cms-stat-val">99.8%</div>
+                  <div class="cms-stat-title">On-Time Accuracy</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tracking Section - Dark Modern Glassmorphism Theme -->
+      <section class="py-7 tracking-landing-section" id="track">
+        <div class="container">
+          <!-- Hero Search Card -->
+          <div class="tracking-search-card mb-4">
+            <div class="tracking-search-body">
+              <div class="tracking-header text-center mb-3">
+                <div class="tracking-badge-pill mb-2">
+                  <i class="fas fa-satellite-dish mr-1 text-cyan"></i> LIVE LOGISTICS MONITOR
+                </div>
+                <h2 class="tracking-title text-white">Track Your Parcel</h2>
+                <p class="tracking-subtitle">
+                  Track your parcel status and enter your shipment reference number to follow the journey, view status history, and monitor delivery in real time.
+                </p>
+              </div>
+
+              <div class="d-flex w-100 justify-content-center align-items-center">
+                <div class="tracking-input-wrapper col-12 col-md-9 col-lg-7 p-0">
+                  <div class="input-group tracking-input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text tracking-input-icon">
+                        <i class="fas fa-barcode"></i>
+                      </span>
+                    </div>
+                    <input type="search" id="ref_no" class="form-control tracking-input" placeholder="Type or paste tracking number (e.g. 201406231415)" autocomplete="off">
+                    <div class="input-group-append">
+                      <button type="button" id="track-btn" class="btn tracking-btn">
+                        <i class="fas fa-search-location mr-2"></i> Track Now
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Quick Test Badges -->
+                  <div class="quick-samples mt-2 text-center">
+                    <span class="sample-label mr-2"><i class="fas fa-bolt text-warning mr-1"></i> Quick Test:</span>
+                    <button type="button" class="sample-badge" data-ref="201406231415">
+                      <i class="fas fa-check-circle text-success mr-1"></i> 201406231415 <span class="badge-sub">(Delivered - 7 Milestones)</span>
+                    </button>
+                    <button type="button" class="sample-badge" data-ref="333930610513">
+                      <i class="fas fa-box text-info mr-1"></i> 333930610513 <span class="badge-sub">(Accepted)</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Main Tracking Results & Route Visualizer -->
+          <div class="row tracking-content-row">
+            <!-- Left Column: Vertical Timeline -->
+            <div class="col-lg-7 col-xl-8 mb-4">
+              <!-- Parcel Overview Header Bar -->
+              <div id="tracking_meta_card" class="tracking-meta-card d-none mb-3">
+                <div class="d-flex flex-wrap align-items-center justify-content-between">
+                  <div class="d-flex align-items-center mb-2 mb-md-0">
+                    <div class="meta-icon-box mr-3">
+                      <i class="fas fa-shipping-fast text-cyan"></i>
+                    </div>
+                    <div>
+                      <span class="meta-label">WAYBILL REFERENCE</span>
+                      <h5 class="meta-ref mb-0 text-white font-weight-bold" id="meta_ref_text">#--</h5>
+                    </div>
+                  </div>
+                  <div class="d-flex align-items-center">
+                    <div class="text-right mr-3">
+                      <span class="meta-label">CURRENT STATUS</span>
+                      <div id="meta_status_pill" class="meta-status-pill">In Transit</div>
+                    </div>
+                    <div class="meta-badge-count">
+                      <span id="meta_count">0</span> Milestones
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Empty State Card -->
+              <div id="tracking_empty_state" class="tracking-empty-card text-center p-5">
+                <div class="empty-icon-wrap mb-3">
+                  <i class="fas fa-radar"></i>
+                </div>
+                <h4 class="text-white font-weight-bold mb-2">Awaiting Tracking Reference</h4>
+                <p class="text-muted mb-4 max-w-450 mx-auto">
+                  Enter a valid consignment reference number above or click one of the quick test badges to view detailed transit milestones.
+                </p>
+                <div class="d-inline-flex align-items-center empty-hint-pill">
+                  <i class="fas fa-shield-alt text-primary mr-2"></i> End-to-End Real-Time GPS & Dispatch Synchronization
+                </div>
+              </div>
+
+              <!-- Vertical Timeline Container -->
+              <div class="tracking-timeline-container d-none" id="tracking_timeline_wrap">
+                <div class="modern-timeline" id="parcel_history"></div>
+              </div>
+            </div>
+
+            <!-- Right Column: Route Visualizer & Carrier Intelligence -->
+            <div class="col-lg-5 col-xl-4">
+              <div class="route-visualizer-card sticky-top">
+                <div class="card-header-gradient d-flex align-items-center justify-content-between">
+                  <span class="font-weight-bold text-white"><i class="fas fa-route mr-2 text-cyan"></i> Transit Route Visualizer</span>
+                  <span class="badge badge-route-live"><span class="pulse-dot"></span> LIVE</span>
+                </div>
+
+                <div class="route-body">
+                  <!-- Animated Route Illustration -->
+                  <div class="route-graphic-stage">
+                    <div class="route-line-bg"></div>
+                    <div class="route-line-active" id="route_line_progress"></div>
+
+                    <!-- Stop 1 -->
+                    <div class="route-stop stop-1 active">
+                      <div class="stop-node">
+                        <i class="fas fa-warehouse"></i>
+                      </div>
+                      <div class="stop-info">
+                        <span class="stop-title">Origin Branch</span>
+                        <span class="stop-desc">Package Intake</span>
+                      </div>
+                    </div>
+
+                    <!-- Stop 2 -->
+                    <div class="route-stop stop-2" id="route_stop_2">
+                      <div class="stop-node">
+                        <i class="fas fa-truck-moving"></i>
+                      </div>
+                      <div class="stop-info">
+                        <span class="stop-title">Linehaul Transit</span>
+                        <span class="stop-desc">Regional Transit</span>
+                      </div>
+                    </div>
+
+                    <!-- Stop 3 -->
+                    <div class="route-stop stop-3" id="route_stop_3">
+                      <div class="stop-node">
+                        <i class="fas fa-building"></i>
+                      </div>
+                      <div class="stop-info">
+                        <span class="stop-title">Local Facility</span>
+                        <span class="stop-desc">Sorting & Assignment</span>
+                      </div>
+                    </div>
+
+                    <!-- Stop 4 -->
+                    <div class="route-stop stop-4" id="route_stop_4">
+                      <div class="stop-node">
+                        <i class="fas fa-map-marker-alt"></i>
+                      </div>
+                      <div class="stop-info">
+                        <span class="stop-title">Recipient Address</span>
+                        <span class="stop-desc">Final Doorstep</span>
+                      </div>
+                    </div>
+
+                    <!-- Moving Courier Graphic -->
+                    <div class="moving-courier-truck" id="moving_truck">
+                      <div class="truck-box">
+                        <i class="fas fa-shipping-fast"></i>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Quick Logistics Details -->
+                  <div class="logistics-info-box mt-4">
+                    <div class="info-row">
+                      <span class="info-label"><i class="fas fa-truck text-muted mr-2"></i> Carrier</span>
+                      <span class="info-val text-white">CMS Express Logistics</span>
+                    </div>
+                    <div class="info-row">
+                      <span class="info-label"><i class="fas fa-lock text-muted mr-2"></i> Security</span>
+                      <span class="info-val text-cyan">Barcode Encrypted</span>
+                    </div>
+                    <div class="info-row">
+                      <span class="info-label"><i class="fas fa-headset text-muted mr-2"></i> Support</span>
+                      <span class="info-val text-white">24/7 Dispatch Control</span>
+                    </div>
+                  </div>
+
+                  <!-- Courier Mini Graphic Card -->
+                  <div class="courier-mini-badge mt-3">
+                    <div class="d-flex align-items-center">
+                      <div class="mini-icon-avatar mr-3">
+                        <i class="fas fa-box-open text-primary"></i>
+                      </div>
+                      <div>
+                        <div class="font-weight-bold text-white text-sm">Real-Time Verification</div>
+                        <div class="text-xs text-muted">All milestones are digitally timestamped upon physical barcode scan.</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Services Section - Dark Modern Theme -->
+      <section class="services-dark-section" id="services">
+        <div class="container">
+          <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6 text-center mb-5">
+              <span class="services-badge"><i class="fas fa-cubes me-1"></i> COMPREHENSIVE LOGISTICS</span>
+              <h2 class="services-heading">Our Services for You</h2>
+              <p class="text-muted fs-0">Enterprise-grade dispatch solutions tailored for speed, reliability, and security.</p>
+            </div>
+          </div>
+          <div class="row g-4 justify-content-center">
+            <!-- Service 1 -->
+            <div class="col-md-6 col-lg-4">
+              <div class="service-glass-card">
+                <div>
+                  <div class="service-icon-bubble">
+                    <img class="img-fluid" src="/landing_assets/img/icons/services-1.svg" alt="Business Services" style="width: 42px; filter: drop-shadow(0 0 10px rgba(255, 107, 43, 0.4));" />
+                  </div>
+                  <h5 class="service-title text-center">Business Services</h5>
+                  <p class="service-desc text-center">Offering seamless commercial delivery across cities, ensuring corporate products arrive securely at doorsteps within 24-48 hours.</p>
+                </div>
+                <ul class="service-feature-list mt-3">
+                  <li class="service-feature-item"><i class="fas fa-circle service-bullet-icon"></i> Corporate Bulk Consignments</li>
+                  <li class="service-feature-item"><i class="fas fa-circle service-bullet-icon"></i> B2B Scheduled Shipment Linehaul</li>
+                  <li class="service-feature-item"><i class="fas fa-circle service-bullet-icon"></i> Commercial Inventory Logistics</li>
+                </ul>
+              </div>
+            </div>
+            <!-- Service 2 -->
+            <div class="col-md-6 col-lg-4">
+              <div class="service-glass-card">
+                <div>
+                  <div class="service-icon-bubble">
+                    <img class="img-fluid" src="/landing_assets/img/icons/services-2.svg" alt="Statewide Services" style="width: 42px; filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.4));" />
+                  </div>
+                  <h5 class="service-title text-center">Statewide Distribution</h5>
+                  <p class="service-desc text-center">Rapid interstate cargo and parcel transit connecting all regional sorting centers with round-the-clock dispatch coordination.</p>
+                </div>
+                <ul class="service-feature-list mt-3">
+                  <li class="service-feature-item"><i class="fas fa-circle service-bullet-icon" style="color: #00f0ff; filter: drop-shadow(0 0 6px rgba(0,240,255,0.8));"></i> Real-Time Waybill GPS Verification</li>
+                  <li class="service-feature-item"><i class="fas fa-circle service-bullet-icon" style="color: #00f0ff; filter: drop-shadow(0 0 6px rgba(0,240,255,0.8));"></i> Tamper-Proof Encrypted Barcodes</li>
+                  <li class="service-feature-item"><i class="fas fa-circle service-bullet-icon" style="color: #00f0ff; filter: drop-shadow(0 0 6px rgba(0,240,255,0.8));"></i> Automated Milestone Synchronization</li>
+                </ul>
+              </div>
+            </div>
+            <!-- Service 3 -->
+            <div class="col-md-6 col-lg-4">
+              <div class="service-glass-card">
+                <div>
+                  <div class="service-icon-bubble">
+                    <img class="img-fluid" src="/landing_assets/img/icons/services-3.svg" alt="Personal Services" style="width: 42px; filter: drop-shadow(0 0 10px rgba(168, 85, 247, 0.4));" />
+                  </div>
+                  <h5 class="service-title text-center">Personal Express</h5>
+                  <p class="service-desc text-center">Trust our courier specialists to deliver your most time-sensitive documents, gifts, and personal packages with direct signature confirmation.</p>
+                </div>
+                <ul class="service-feature-list mt-3">
+                  <li class="service-feature-item"><i class="fas fa-circle service-bullet-icon" style="color: #a855f7; filter: drop-shadow(0 0 6px rgba(168,85,247,0.8));"></i> Confidential Document Envelopes</li>
+                  <li class="service-feature-item"><i class="fas fa-circle service-bullet-icon" style="color: #a855f7; filter: drop-shadow(0 0 6px rgba(168,85,247,0.8));"></i> Fragile & Sensitive Item Handling</li>
+                  <li class="service-feature-item"><i class="fas fa-circle service-bullet-icon" style="color: #a855f7; filter: drop-shadow(0 0 6px rgba(168,85,247,0.8));"></i> Direct Recipient Verification</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer Section - Dark Modern Theme -->
+      <section class="footer-dark-section" id="findUs">
+        <div class="container">
+          <div class="row g-4">
+            <div class="col-12 col-lg-5 mb-3">
+              <a class="text-decoration-none d-inline-block mb-3" href="#"><img src="/landing_assets/img/gallery/footer-logo.png" height="51" alt="logo" style="filter: drop-shadow(0 0 12px rgba(255, 107, 43, 0.3));" /></a>
+              <p class="text-muted my-3 pe-lg-4">The most trusted and technologically advanced Courier Management Network in your area, handling consignments with speed and precision.</p>
+              <div class="footer-contact-item">
+                <div class="footer-icon-wrap"><i class="fas fa-map-marker-alt"></i></div>
+                <span>{{ system.address | default('2102 Caldwell Road, Rochester, New York, 14608') }}</span>
+              </div>
+              <div class="footer-contact-item">
+                <div class="footer-icon-wrap"><i class="fas fa-phone-alt"></i></div>
+                <span>{{ system.contact | default('+6948 8542 623') }}</span>
+              </div>
+              <div class="footer-contact-item">
+                <div class="footer-icon-wrap"><i class="fas fa-envelope"></i></div>
+                <span>{{ system.email | default('info@sample.comm') }}</span>
+              </div>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2 mb-3">
+              <h5 class="lh-lg fw-bold mb-3 text-white font-sans-serif" style="font-size: 1.05rem;">Navigation</h5>
+              <ul class="list-unstyled mb-0">
+                <li class="lh-lg"><a href="#home">Home</a></li>
+                <li class="lh-lg"><a href="#services">Our Services</a></li>
+                <li class="lh-lg"><a href="#track">Track Parcel</a></li>
+                <li class="lh-lg"><a href="#findUs">Find Us</a></li>
+              </ul>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2 mb-3">
+              <h5 class="lh-lg fw-bold text-white mb-3 font-sans-serif" style="font-size: 1.05rem;">Solutions</h5>
+              <ul class="list-unstyled mb-0">
+                <li class="lh-lg"><a href="#services">Corporate Goods</a></li>
+                <li class="lh-lg"><a href="#services">Express Freight</a></li>
+                <li class="lh-lg"><a href="#services">Document Dispatch</a></li>
+                <li class="lh-lg"><a href="#services">Warehousing</a></li>
+              </ul>
+            </div>
+            <div class="col-12 col-md-4 col-lg-3 mb-3">
+              <h5 class="lh-lg fw-bold text-white mb-3 font-sans-serif" style="font-size: 1.05rem;">Live Support</h5>
+              <p class="text-muted fs--1">Need immediate dispatch assistance or custom freight arrangements? Our 24/7 routing desk is always online.</p>
+              <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill mt-2" style="background: rgba(255, 107, 43, 0.12); border: 1px solid rgba(255, 107, 43, 0.3);">
+                <span class="pulse-dot-green"></span>
+                <span class="text-white fs--1 font-weight-bold">System Status: All Nodes Online</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="copyright-dark-bar">
+        <div class="container">
+          <div class="row justify-content-between align-items-center py-2">
+            <div class="col-12 col-md-6 text-center text-md-start">
+              <p class="mb-0">All rights Reserved &copy; {{ system.name | default('Courier Management System') }}, 2026</p>
+            </div>
+            <div class="col-12 col-md-6 text-center text-md-end mt-2 mt-md-0">
+              <p class="mb-0 text-muted">Powered by Flask Python Backend &bull; Dark Logistics Architecture</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Scripts -->
+    <script src="/landing_vendors/jquery/jquery.min.js"></script>
+    <script src="/landing_vendors/@popperjs/popper.min.js"></script>
+    <script src="/landing_vendors/bootstrap/bootstrap.min.js"></script>
+    <script src="/landing_vendors/is/is.min.js"></script>
+    <script src="/landing_vendors/fontawesome/all.min.js"></script>
+    <script src="/landing_assets/js/theme.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@200;300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+
+    <div id="clone_timeline-item" class="d-none">
+        <div class="iitem">
+            <i class="fas fa-box bg-blue"></i>
+            <div class="timeline-item">
+              <span class="time"><i class="fas fa-clock"></i> <span class="dtime">12:05</span></span>
+              <div class="timeline-body">
+              </div>
+            </div>
+          </div>
+    </div>
+
+    <script>
+    $(document).ready(function(){
+      var STATUS_CONFIG = {
+        "Item Accepted by Courier": {
+          icon: "fas fa-box-open",
+          color: "#38bdf8",
+          glow: "rgba(56, 189, 248, 0.45)",
+          gradient: "linear-gradient(180deg, #0284c7, #38bdf8)",
+          desc: "Parcel documentation verified and consignment formally accepted into Courier Management System dispatch hub.",
+          progress: "20%"
+        },
+        "Collected": {
+          icon: "fas fa-dolly-flatbed",
+          color: "#818cf8",
+          glow: "rgba(129, 140, 248, 0.45)",
+          gradient: "linear-gradient(180deg, #4f46e5, #818cf8)",
+          desc: "Consignment safely collected from origin branch and staged for regional vehicle transfer.",
+          progress: "35%"
+        },
+        "Shipped": {
+          icon: "fas fa-shipping-fast",
+          color: "#a855f7",
+          glow: "rgba(168, 85, 247, 0.45)",
+          gradient: "linear-gradient(180deg, #7c3aed, #a855f7)",
+          desc: "Dispatched from primary sorting terminal via regional transport linehaul carrier route.",
+          progress: "50%"
+        },
+        "In-Transit": {
+          icon: "fas fa-truck-moving",
+          color: "#00f0ff",
+          glow: "rgba(0, 240, 255, 0.5)",
+          gradient: "linear-gradient(180deg, #0099ff, #00f0ff)",
+          desc: "Shipment in linehaul transit moving smoothly towards the destination regional distribution hub.",
+          progress: "65%"
+        },
+        "Arrived At Destination": {
+          icon: "fas fa-map-marked-alt",
+          color: "#3b82f6",
+          glow: "rgba(59, 130, 246, 0.45)",
+          gradient: "linear-gradient(180deg, #1d4ed8, #3b82f6)",
+          desc: "Consignment safely checked in at local destination distribution facility and staged for final delivery run.",
+          progress: "80%"
+        },
+        "Out for Delivery": {
+          icon: "fas fa-motorcycle",
+          color: "#f59e0b",
+          glow: "rgba(245, 158, 11, 0.5)",
+          gradient: "linear-gradient(180deg, #d97706, #f59e0b)",
+          desc: "Courier driver assigned with consignment and actively out on final delivery run to recipient address.",
+          progress: "90%"
+        },
+        "Ready to Pickup": {
+          icon: "fas fa-warehouse",
+          color: "#06b6d4",
+          glow: "rgba(6, 182, 212, 0.45)",
+          gradient: "linear-gradient(180deg, #0891b2, #06b6d4)",
+          desc: "Package ready for recipient collection at destination branch counter with valid identification.",
+          progress: "90%"
+        },
+        "Delivered": {
+          icon: "fas fa-check-circle",
+          color: "#10b981",
+          glow: "rgba(16, 185, 129, 0.55)",
+          gradient: "linear-gradient(180deg, #059669, #10b981)",
+          desc: "Consignment successfully delivered to recipient doorstep and verified with electronic signature sign-off.",
+          progress: "100%"
+        },
+        "Picked-up": {
+          icon: "fas fa-handshake",
+          color: "#10b981",
+          glow: "rgba(16, 185, 129, 0.55)",
+          gradient: "linear-gradient(180deg, #059669, #10b981)",
+          desc: "Package directly claimed, verified, and signed off by recipient at destination branch.",
+          progress: "100%"
+        },
+        "Unsuccessful Delivery Attempt": {
+          icon: "fas fa-exclamation-triangle",
+          color: "#f43f5e",
+          glow: "rgba(244, 63, 94, 0.5)",
+          gradient: "linear-gradient(180deg, #e11d48, #f43f5e)",
+          desc: "Delivery attempt unsuccessful due to recipient absence or access restriction. Rescheduling automatic next attempt.",
+          progress: "85%"
+        },
+        "Unsuccessfull Delivery Attempt": {
+          icon: "fas fa-exclamation-triangle",
+          color: "#f43f5e",
+          glow: "rgba(244, 63, 94, 0.5)",
+          gradient: "linear-gradient(180deg, #e11d48, #f43f5e)",
+          desc: "Delivery attempt unsuccessful due to recipient absence or access restriction. Rescheduling automatic next attempt.",
+          progress: "85%"
+        }
+      };
+
+      function updateRouteVisualizer(latestStatus){
+        var cfg = STATUS_CONFIG[latestStatus] || {progress: "25%"};
+        var progressVal = cfg.progress || "25%";
+        $('#route_line_progress').css('height', progressVal);
+
+        var pInt = parseInt(progressVal);
+        $('#route_stop_2').toggleClass('active', pInt >= 50).toggleClass('completed', pInt > 50);
+        $('#route_stop_3').toggleClass('active', pInt >= 80).toggleClass('completed', pInt > 80);
+        $('#route_stop_4').toggleClass('active', pInt >= 100).toggleClass('completed', pInt >= 100);
+
+        var truckTop = (1.5 + (pInt / 100) * 12) + "rem";
+        $('#moving_truck').css('top', truckTop);
+      }
+
+      window.track_now = function(){
+        var tracking_num = $.trim($('#ref_no').val());
+        if(!tracking_num){
+          $('#tracking_empty_state').removeClass('d-none');
+          $('#tracking_timeline_wrap').addClass('d-none');
+          $('#tracking_meta_card').addClass('d-none');
+          $('#parcel_history').html('');
+          $('#route_line_progress').css('height', '0%');
+          return;
+        }
+
+        $('#tracking_empty_state').addClass('d-none');
+        $('#parcel_history').html('<div class="text-center py-4 text-cyan font-weight-bold"><i class="fas fa-spinner fa-spin mr-2"></i> Fetching live dispatch telemetry...</div>');
+        $('#tracking_timeline_wrap').removeClass('d-none');
+
+        $.ajax({
+          url: '/api/parcel/history',
+          method: 'GET',
+          data: {ref_no: tracking_num},
+          error: function(xhr, status, err){
+            console.error(err);
+            var errMsg = "An error occurred during tracking request.";
+            if (xhr.status === 404 || (xhr.responseJSON && xhr.responseJSON.status === 'error')) {
+              errMsg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : ('Unknown tracking number: ' + tracking_num);
+            }
+            alert(errMsg);
+            $('#tracking_empty_state').removeClass('d-none');
+            $('#tracking_timeline_wrap').addClass('d-none');
+            $('#tracking_meta_card').addClass('d-none');
+            $('#parcel_history').html('');
+          },
+          success: function(resp){
+            var data = resp;
+            if(typeof resp === 'string'){
+              try {
+                data = JSON.parse(resp);
+              } catch(e){
+                data = resp;
+              }
+            }
+
+            if(data == 2 || data === "2" || (data && data.status === 'error')){
+              alert('Unknown tracking number: ' + tracking_num);
+              $('#tracking_empty_state').removeClass('d-none');
+              $('#tracking_timeline_wrap').addClass('d-none');
+              $('#tracking_meta_card').addClass('d-none');
+              $('#parcel_history').html('');
+              return;
+            }
+
+            var historyItems = (data && data.history) ? data.history : data;
+            if(Array.isArray(historyItems) && historyItems.length > 0){
+              var totalItems = historyItems.length;
+              var latestItem = historyItems[totalItems - 1];
+              var latestStatus = latestItem.status;
+
+              // Update Meta Overview Card
+              $('#meta_ref_text').text('#' + tracking_num);
+              $('#meta_count').text(totalItems);
+              var latestCfg = STATUS_CONFIG[latestStatus] || {color: '#38bdf8', glow: 'rgba(56, 189, 248, 0.4)'};
+              $('#meta_status_pill').text(latestStatus)
+                .css({
+                  'color': latestCfg.color,
+                  'border-color': latestCfg.color,
+                  'background': latestCfg.glow.replace('0.4', '0.12').replace('0.5', '0.15')
+                });
+              $('#tracking_meta_card').removeClass('d-none');
+              $('#tracking_empty_state').addClass('d-none');
+              $('#tracking_timeline_wrap').removeClass('d-none');
+
+              // Build modern animated timeline cards
+              var html = '';
+              historyItems.forEach(function(item, idx){
+                var isCurrent = (idx === totalItems - 1);
+                var cfg = STATUS_CONFIG[item.status] || {
+                  icon: "fas fa-box",
+                  color: "#38bdf8",
+                  glow: "rgba(56, 189, 248, 0.4)",
+                  gradient: "linear-gradient(180deg, #0284c7, #38bdf8)",
+                  desc: "Consignment milestone logged and synchronized with central dispatch registry."
+                };
+
+                var delay = (idx * 0.08) + 's';
+
+                html += '<div class="modern-tl-item ' + (isCurrent ? 'is-current' : '') + '" style="animation-delay: ' + delay + '; --node-color: ' + cfg.color + '; --node-glow: ' + cfg.glow + '; --node-gradient: ' + cfg.gradient + ';">';
+                
+                // Node Icon
+                html += '  <div class="modern-tl-node">';
+                html += '    <i class="' + cfg.icon + '"></i>';
+                html += '  </div>';
+
+                // Glassmorphism Card
+                html += '  <div class="modern-tl-card">';
+                html += '    <div class="tl-card-header">';
+                html += '      <h5 class="tl-status-title">';
+                html += '        <i class="' + cfg.icon + ' mr-2" style="color: ' + cfg.color + '"></i> ' + item.status;
+                html += '      </h5>';
+                html += '      <span class="tl-time-badge">';
+                html += '        <i class="far fa-clock mr-1 text-primary"></i> ' + item.date_created;
+                html += '      </span>';
+                html += '    </div>';
+                
+                html += '    <p class="tl-status-desc">' + cfg.desc + '</p>';
+                
+                html += '    <div class="tl-status-meta">';
+                if(isCurrent){
+                  html += '      <span class="tl-badge-active"><span class="pulse-dot"></span> CURRENT STATUS</span>';
+                  html += '      <span class="text-xs text-muted"><i class="fas fa-satellite text-cyan mr-1"></i> Active Stage</span>';
+                } else {
+                  html += '      <span class="tl-badge-completed"><i class="fas fa-check mr-1"></i> COMPLETED</span>';
+                  html += '      <span class="text-xs text-muted">Milestone #' + (idx + 1) + '</span>';
+                }
+                html += '    </div>';
+                html += '  </div>';
+
+                html += '</div>';
+              });
+
+              $('#parcel_history').html(html);
+              updateRouteVisualizer(latestStatus);
+            } else {
+              $('#tracking_empty_state').removeClass('d-none');
+              $('#tracking_timeline_wrap').addClass('d-none');
+              $('#tracking_meta_card').addClass('d-none');
+              $('#parcel_history').html('');
+            }
+          }
+        });
+      };
+
+      $('#track-btn').click(function(e){
+        e.preventDefault();
+        track_now();
+      });
+
+      $('#ref_no').on('keypress', function(e){
+        if(e.which === 13){
+          e.preventDefault();
+          track_now();
+        }
+      });
+
+      $('#ref_no').on('search', function(){
+        track_now();
+      });
+
+      $(document).on('click', '.sample-badge', function(e){
+        e.preventDefault();
+        var ref = $(this).data('ref');
+        $('#ref_no').val(ref);
+        track_now();
+      });
+
+      var urlParams = new URLSearchParams(window.location.search);
+      var autoRef = urlParams.get('ref_no') || urlParams.get('ref');
+      if(autoRef){
+        $('#ref_no').val(autoRef);
+        track_now();
+      }
+    });
+    </script>
+  </body>
+</html>

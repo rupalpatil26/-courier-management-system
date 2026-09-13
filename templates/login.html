@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+{% include 'partials/header.html' %}
+<body class="hold-transition modern-login-body">
+
+<div class="modern-login-box">
+  <div class="modern-login-card">
+    
+    <!-- Circular Courier Profile Illustration -->
+    <div class="login-avatar-wrapper">
+      <div class="login-avatar-ring">
+        <img src="/assets/dist/img/courier_avatar.png" alt="Courier Delivery Specialist" class="login-avatar-img">
+      </div>
+    </div>
+
+    <!-- Title Section -->
+    <div class="login-title-section">
+      <h2>{{ system.name | default('Courier Management System') }}</h2>
+      <p>Enter your credentials to access the portal</p>
+    </div>
+
+    <!-- Login Form -->
+    <form action="" id="login-form">
+      <div id="login-alert-area"></div>
+
+      <!-- Username / Email Field -->
+      <div class="modern-input-group">
+        <i class="fas fa-user-shield modern-input-icon"></i>
+        <input type="text" class="form-control" name="email" id="email" required placeholder="Username or Email" autocomplete="username">
+      </div>
+
+      <!-- Password Field -->
+      <div class="modern-input-group">
+        <i class="fas fa-key modern-input-icon"></i>
+        <input type="password" class="form-control" name="password" id="password" required placeholder="Password" autocomplete="current-password">
+      </div>
+
+      <!-- Remember Me & Forgot link -->
+      <div class="d-flex justify-content-between align-items-center mb-4 text-white-50" style="font-size: 0.85rem;">
+        <div class="custom-control custom-checkbox">
+          <input type="checkbox" class="custom-control-input" id="remember" name="remember" checked>
+          <label class="custom-control-label text-muted" for="remember" style="cursor: pointer;">Keep me signed in</label>
+        </div>
+        <span class="text-white-50"><i class="fas fa-shield-alt text-primary mr-1"></i> Secured</span>
+      </div>
+
+      <!-- Submit Button -->
+      <button type="submit" class="btn btn-primary btn-block btn-modern-login d-flex align-items-center justify-content-center">
+        <span>Sign In to Portal</span>
+        <i class="fas fa-arrow-right ml-2" style="font-size: 0.9rem;"></i>
+      </button>
+    </form>
+
+    <div class="text-center mt-3 pt-3 border-top" style="border-color: rgba(255,255,255,0.08) !important; font-size: 0.9rem;">
+      <span class="text-muted">Need to ship parcels?</span>
+      <a href="{{ url_for('customer.register') }}" class="font-weight-bold text-info ml-1">Create Customer Account</a>
+    </div>
+
+    <div class="login-footer-text mt-2">
+      <a href="/"><i class="fas fa-search-location mr-1"></i> Back to Public Tracking Portal</a>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  $(document).ready(function(){
+    $('#login-form').submit(function(e){
+      e.preventDefault();
+      var email = $.trim($('#email').val());
+      var password = $('#password').val();
+      $('#login-alert-area').html('');
+      $('.form-control').removeClass('is-invalid');
+
+      if (!email && !password) {
+        $('#login-alert-area').html('<div class="alert alert-danger mb-3 py-2 text-center" style="border-radius: 10px; font-size: 0.9rem;"><i class="fas fa-exclamation-circle mr-1"></i> Please enter your username/email and password.</div>');
+        $('#email, #password').addClass('is-invalid');
+        $('#email').focus();
+        return false;
+      }
+      if (!email) {
+        $('#login-alert-area').html('<div class="alert alert-danger mb-3 py-2 text-center" style="border-radius: 10px; font-size: 0.9rem;"><i class="fas fa-exclamation-circle mr-1"></i> Please enter your username or email.</div>');
+        $('#email').addClass('is-invalid').focus();
+        return false;
+      }
+      if (!password) {
+        $('#login-alert-area').html('<div class="alert alert-danger mb-3 py-2 text-center" style="border-radius: 10px; font-size: 0.9rem;"><i class="fas fa-exclamation-circle mr-1"></i> Please enter your password.</div>');
+        $('#password').addClass('is-invalid').focus();
+        return false;
+      }
+
+      start_load();
+      
+      $.ajax({
+        url: '/api/auth/login',
+        method: 'POST',
+        data: $(this).serialize(),
+        error: function(err){
+          console.error(err);
+          end_load();
+          $('#login-alert-area').html('<div class="alert alert-danger mb-3 py-2 text-center" style="border-radius: 10px; font-size: 0.9rem;"><i class="fas fa-exclamation-triangle mr-1"></i> An error occurred while signing in. Please try again.</div>');
+        },
+        success: function(resp){
+          if(resp == 1 || resp == '1'){
+            location.href = '/dashboard?page=home';
+          } else if(resp === 'empty' || resp == 'empty') {
+            $('#login-alert-area').html('<div class="alert alert-danger mb-3 py-2 text-center" style="border-radius: 10px; font-size: 0.9rem;"><i class="fas fa-exclamation-circle mr-1"></i> Username and password are required.</div>');
+            end_load();
+          } else {
+            $('#login-alert-area').html('<div class="alert alert-danger mb-3 py-2 text-center" style="border-radius: 10px; font-size: 0.9rem;"><i class="fas fa-exclamation-circle mr-1"></i> Invalid username or password.</div>');
+            $('#password').val('');
+            end_load();
+          }
+        }
+      });
+    });
+  });
+</script>
+
+{% include 'partials/footer.html' %}
+</body>
+</html>

@@ -1,0 +1,36 @@
+{% extends 'customer/base.html' %}
+{% block title %}Notifications{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <h2 class="font-weight-bold text-white m-0">In-App Notifications 🔔</h2>
+  <p class="text-muted m-0 mt-1">Lifecycle notifications, dispatch updates, and OTP delivery alerts.</p>
+</div>
+
+<div class="glass-card p-4" style="max-width: 800px;">
+  {% if notifications %}
+  <ul class="list-unstyled mb-0">
+    {% for n in notifications %}
+    <li class="p-3 mb-3 rounded d-flex align-items-start gap-3" style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.06);">
+      <div style="width: 42px; height: 42px; min-width: 42px; border-radius: 10px; background: rgba(56,189,248,0.15); display: flex; align-items: center; justify-content: center;">
+        <i class="fas fa-bell text-info"></i>
+      </div>
+      <div class="flex-grow-1 ml-3">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+          <h6 class="font-weight-bold text-white m-0">{{ n.title }}</h6>
+          <span class="small text-muted"><i class="far fa-clock mr-1"></i>{{ n.date_created }}</span>
+        </div>
+        <p class="text-muted m-0" style="font-size: 0.95rem;">{{ n.message }}</p>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <div class="text-center py-5 text-muted">
+    <i class="far fa-bell-slash fa-3x mb-3" style="opacity: 0.3;"></i>
+    <p class="h5 text-white">No notifications</p>
+    <p class="small text-muted">You are all caught up! Updates regarding your shipments will appear here.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

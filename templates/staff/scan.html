@@ -1,0 +1,231 @@
+{% extends 'staff/base.html' %}
+{% block title %}Barcode & QR Scanner{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <a href="{{ url_for('staff.dashboard') }}" class="text-muted small"><i class="fas fa-arrow-left mr-1"></i> Back to Hub</a>
+  <h2 class="font-weight-bold text-white mt-1 m-0">Barcode & QR Code Scanner 📷</h2>
+  <p class="text-muted">Scan the parcel barcode or QR code using camera, laser scanner, or reference number.</p>
+</div>
+
+<div class="row">
+  <!-- Scanner Column -->
+  <div class="col-lg-6 mb-4">
+    <div class="glass-card p-4">
+      <h5 class="font-weight-bold text-info mb-3"><i class="fas fa-barcode mr-2"></i> Scan or Enter Tracking #</h5>
+      
+      <!-- Manual / Hardware Scanner Input -->
+      <form id="barcodeScanForm" class="mb-4">
+        <label class="text-muted small font-weight-bold">Handheld Scanner / Manual Entry</label>
+        <div class="input-group">
+          <input type="text" id="scannerInput" class="form-control" placeholder="Scan barcode or enter 12-digit number..." autofocus autocomplete="off" style="background: rgba(15,23,42,0.8); color: white; border-color: rgba(56,189,248,0.4); font-size: 1.1rem; letter-spacing: 1px;">
+          <div class="input-group-append">
+            <button type="submit" class="btn btn-info font-weight-bold">
+              <i class="fas fa-search mr-1"></i> Look Up
+            </button>
+          </div>
+        </div>
+        <small class="text-muted mt-1 d-block"><i class="fas fa-info-circle mr-1"></i> Compatible with USB & Bluetooth laser barcode scanners (auto-submits on carriage return).</small>
+      </form>
+
+      <!-- Camera Scanner Interface -->
+      <div class="border-top pt-3" style="border-color: rgba(255,255,255,0.08) !important;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <label class="text-muted small font-weight-bold m-0"><i class="fas fa-camera mr-1"></i> Live Camera Feed Scanner</label>
+          <button type="button" id="btnToggleCam" class="btn btn-sm btn-outline-success" onclick="toggleCameraScanner()">
+            <i class="fas fa-video mr-1"></i> Start Camera
+          </button>
+        </div>
+
+        <div id="cameraContainer" class="p-3 text-center rounded position-relative" style="background: #0f172a; min-height: 240px; display: flex; align-items: center; justify-content: center; border: 2px dashed rgba(255,255,255,0.15);">
+          <div id="camPlaceholder">
+            <i class="fas fa-camera fa-3x text-muted mb-2" style="opacity: 0.4;"></i>
+            <p class="text-muted small m-0">Click "Start Camera" to enable optical barcode & QR scanning</p>
+          </div>
+          <div id="reader" style="width: 100%; max-width: 400px; display: none;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Parcel Details Results Column -->
+  <div class="col-lg-6 mb-4">
+    <div class="glass-card p-4 h-100">
+      <h5 class="font-weight-bold text-white mb-3"><i class="fas fa-box text-success mr-2"></i> Scanned Package Details</h5>
+
+      <div id="scanResultPlaceholder" class="text-center py-5 text-muted">
+        <i class="fas fa-barcode fa-4x mb-3" style="opacity: 0.25;"></i>
+        <p class="h6 text-light">Awaiting Scan Input</p>
+        <p class="small text-muted">Scan a barcode or enter reference number to load parcel details and delivery actions.</p>
+      </div>
+
+      <div id="scanResultContent" style="display: none;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <span class="h4 font-weight-bold text-info m-0" id="resRefNo">#000000000000</span>
+          <span id="resStatusBadge" class="badge-status badge-pending">In Transit</span>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-6">
+            <div class="small text-muted">Recipient</div>
+            <div class="font-weight-bold text-white" id="resRecipientName">-</div>
+            <div class="small text-info" id="resRecipientContact">-</div>
+          </div>
+          <div class="col-6">
+            <div class="small text-muted">Payment Amount</div>
+            <div class="font-weight-bold text-white" id="resPrice">$0.00</div>
+            <div class="small" id="resPaymentStatus">-</div>
+          </div>
+        </div>
+
+        <div class="form-group mb-3">
+          <div class="small text-muted">Destination Address</div>
+          <div class="p-2 rounded mt-1" style="background: rgba(15,23,42,0.6); color: white;" id="resAddress">-</div>
+        </div>
+
+        <div class="p-3 bg-white rounded border my-3">
+          <div class="d-flex align-items-center justify-content-around">
+            <div class="text-center pr-3 border-right">
+              <img id="resQrImg" src="" alt="Parcel QR Code" style="width: 85px; height: 85px; border: 1px solid #cbd5e1; border-radius: 6px; padding: 3px; display: block; margin: 0 auto;">
+              <div class="badge badge-light border mt-1 text-dark" style="font-size: 0.72rem;"><i class="fas fa-qrcode mr-1"></i> QR Code</div>
+            </div>
+            <div class="text-center pl-3 flex-grow-1">
+              <img id="resBarcodeImg" src="" alt="Barcode" style="height: 48px; max-width: 100%;">
+              <div class="badge badge-light border mt-1 text-dark" style="font-size: 0.72rem;"><i class="fas fa-barcode mr-1"></i> Code 128</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex gap-2 mt-4 flex-wrap">
+          <button type="button" class="btn btn-success btn-block py-2 font-weight-bold" id="btnDeliverOtpScan" onclick="triggerOtpFromScan()">
+            <i class="fas fa-key mr-2"></i> Deliver with OTP Verification
+          </button>
+          <button type="button" class="btn btn-primary btn-block mt-2 font-weight-bold" id="btnViewParcelScan" onclick="viewParcelDetailsFromScan()">
+            <i class="fas fa-eye mr-2"></i> Open Parcel Details
+          </button>
+          <button type="button" class="btn btn-outline-info btn-block mt-2" id="btnTrackScan" onclick="openTrackFromScan()">
+            <i class="fas fa-search-location mr-2"></i> View Live Tracking Timeline
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Include html5-qrcode from CDN for browser camera scanning -->
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+<script>
+  let html5QrCode = null;
+  let isScanning = false;
+  let scannedParcelData = null;
+
+  function extractTrackingRef(input) {
+    if (!input) return '';
+    input = input.trim();
+    try {
+      if (input.includes('?') || input.startsWith('http://') || input.startsWith('https://')) {
+        let url = new URL(input, window.location.origin);
+        let qRef = url.searchParams.get('ref') || url.searchParams.get('tracking') || url.searchParams.get('id');
+        if (qRef) return qRef.trim();
+      }
+    } catch(e) {}
+    let refMatch = input.match(/[?&]ref=([a-zA-Z0-9_-]+)/);
+    if (refMatch) return refMatch[1];
+    input = input.replace(/^(REF:|TRACK:|#)/i, '').trim();
+    return input;
+  }
+
+  function lookupParcel(rawInput) {
+    let ref = extractTrackingRef(rawInput);
+    if (!ref) return;
+
+    start_load();
+    $.getJSON('/api/parcel/' + encodeURIComponent(ref) + '/details', function(data) {
+      end_load();
+      scannedParcelData = data;
+      $('#scanResultPlaceholder').hide();
+      $('#scanResultContent').fadeIn();
+
+      $('#resRefNo').text('#' + data.reference_number);
+      $('#resRecipientName').text(data.recipient_name);
+      $('#resRecipientContact').text(data.recipient_contact);
+      $('#resPrice').text('$' + parseFloat(data.price || 0).toFixed(2));
+      $('#resPaymentStatus').html('<span class="badge ' + (data.payment_status === 'Paid' ? 'badge-success' : 'badge-warning') + '">' + (data.payment_status || 'Unpaid') + '</span>');
+      $('#resAddress').text(data.recipient_address);
+      $('#resBarcodeImg').attr('src', data.barcode || ('/api/parcel/' + encodeURIComponent(data.reference_number) + '/barcode'));
+      $('#resQrImg').attr('src', '/api/parcel/' + encodeURIComponent(data.reference_number) + '/qrcode');
+
+      if (data.status === 7) {
+        $('#resStatusBadge').removeAttr('class').addClass('badge-status badge-delivered').html('<i class="fas fa-check-circle mr-1"></i> Delivered');
+        $('#btnDeliverOtpScan').prop('disabled', true).text('Already Delivered');
+      } else {
+        $('#resStatusBadge').removeAttr('class').addClass('badge-status badge-transit').html('<i class="fas fa-truck mr-1"></i> ' + data.status_text);
+        $('#btnDeliverOtpScan').prop('disabled', false).html('<i class="fas fa-key mr-2"></i> Deliver with OTP Verification');
+      }
+    }).fail(function() {
+      end_load();
+      alert('Parcel reference number #' + ref + ' not found in courier records.');
+    });
+  }
+
+  function viewParcelDetailsFromScan() {
+    if (!scannedParcelData) return;
+    if (scannedParcelData.id) {
+      uni_modal('<i class="fas fa-box-open mr-2"></i> Parcel Details #' + scannedParcelData.reference_number, '/modal/view_parcel?id=' + scannedParcelData.id, 'large');
+    }
+  }
+
+  $('#barcodeScanForm').submit(function(e) {
+    e.preventDefault();
+    let val = $('#scannerInput').val();
+    lookupParcel(val);
+    $('#scannerInput').select();
+  });
+
+  function toggleCameraScanner() {
+    if (isScanning) {
+      if (html5QrCode) {
+        html5QrCode.stop().then(() => {
+          $('#reader').hide();
+          $('#camPlaceholder').show();
+          $('#btnToggleCam').removeClass('btn-danger').addClass('btn-outline-success').html('<i class="fas fa-video mr-1"></i> Start Camera');
+          isScanning = false;
+        });
+      }
+    } else {
+      $('#camPlaceholder').hide();
+      $('#reader').show();
+      $('#btnToggleCam').removeClass('btn-outline-success').addClass('btn-danger').html('<i class="fas fa-stop mr-1"></i> Stop Camera');
+      isScanning = true;
+
+      html5QrCode = new Html5Qrcode("reader");
+      html5QrCode.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        (decodedText, decodedResult) => {
+          lookupParcel(decodedText);
+          toggleCameraScanner(); // Stop camera after successful scan
+        },
+        (errorMessage) => {
+          // ignore continuous frame scanning errors
+        }
+      ).catch(err => {
+        alert("Camera error or permission denied: " + err);
+        toggleCameraScanner();
+      });
+    }
+  }
+
+  function triggerOtpFromScan() {
+    if (!scannedParcelData) return;
+    // Redirect to delivery dashboard with modal trigger or open modal
+    location.href = '{{ url_for("staff.deliveries") }}?tab=pending';
+  }
+
+  function openTrackFromScan() {
+    if (!scannedParcelData) return;
+    window.open('/track?ref_no=' + scannedParcelData.reference_number, '_blank');
+  }
+</script>
+{% endblock %}

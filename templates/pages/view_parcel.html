@@ -1,0 +1,227 @@
+<div class="col-lg-12">
+  <!-- Top Navigation & Action Buttons -->
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+    <div>
+      <a href="/dashboard?page=parcel_list" class="text-muted small"><i class="fas fa-arrow-left mr-1"></i> Back to Parcel List</a>
+      <h2 class="font-weight-bold text-white mt-1 m-0">Parcel Details: <span class="text-info">#{{ parcel.reference_number if parcel else '' }}</span></h2>
+      <p class="text-muted small m-0">Complete tracking history, recipient specifications, and official dispatch QR code.</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="/api/parcel/{{ parcel.reference_number }}/qrcode" download="QR_{{ parcel.reference_number }}.png" class="btn btn-info font-weight-bold btn-sm">
+        <i class="fas fa-download mr-1"></i> Download QR Code
+      </a>
+      <button type="button" class="btn btn-outline-light font-weight-bold btn-sm" onclick="printPageQrCode('{{ parcel.reference_number }}', '{{ (parcel.recipient_name or '') | escape }}', '{{ (parcel.recipient_address or '') | escape }}')">
+        <i class="fas fa-print mr-1"></i> Print QR Code
+      </button>
+      {% if parcel and parcel.invoice %}
+      <a href="/invoice/{{ parcel.invoice.invoice_number }}" target="_blank" class="btn btn-outline-info font-weight-bold btn-sm">
+        <i class="fas fa-file-invoice mr-1"></i> View Invoice
+      </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Left Column: Sender, Recipient, Specifications, and Tracking -->
+    <div class="col-lg-8 mb-4">
+      <!-- Sender & Recipient Information -->
+      <div class="card bg-dark border-0 p-4 mb-4" style="background: rgba(30, 41, 59, 0.7); border-radius: 14px; border: 1px solid rgba(255,255,255,0.08) !important;">
+        <h5 class="font-weight-bold text-info mb-3"><i class="fas fa-people-carry mr-2"></i> Shipping Parties</h5>
+        <div class="row">
+          <div class="col-md-6 mb-3 mb-md-0 border-right" style="border-color: rgba(255,255,255,0.08) !important;">
+            <span class="text-muted small text-uppercase font-weight-bold d-block mb-1">Sender Details</span>
+            <div class="h5 font-weight-bold text-white mb-1">{{ (parcel.sender_name or '') | title }}</div>
+            <div class="text-muted small mb-1"><i class="fas fa-phone mr-1"></i> {{ parcel.sender_contact or 'N/A' }}</div>
+            {% if parcel.sender_email %}<div class="text-muted small mb-1"><i class="fas fa-envelope mr-1"></i> {{ parcel.sender_email }}</div>{% endif %}
+            <div class="text-light small mt-2"><i class="fas fa-map-marker-alt mr-1 text-danger"></i> {{ parcel.sender_address or 'N/A' }}</div>
+            <div class="mt-2 small text-info"><strong>Origin Branch:</strong> {{ parcel.from_branch_address or 'N/A' }}</div>
+          </div>
+          <div class="col-md-6">
+            <span class="text-muted small text-uppercase font-weight-bold d-block mb-1">Recipient Details</span>
+            <div class="h5 font-weight-bold text-white mb-1">{{ (parcel.recipient_name or '') | title }}</div>
+            <div class="text-muted small mb-1"><i class="fas fa-phone mr-1"></i> <a href="tel:{{ parcel.recipient_contact }}" class="text-info">{{ parcel.recipient_contact or 'N/A' }}</a></div>
+            {% if parcel.recipient_email %}<div class="text-muted small mb-1"><i class="fas fa-envelope mr-1"></i> {{ parcel.recipient_email }}</div>{% endif %}
+            <div class="text-light small mt-2"><i class="fas fa-map-marker-alt mr-1 text-success"></i> {{ parcel.recipient_address or 'N/A' }}</div>
+            <div class="mt-2 small text-info"><strong>Destination Branch:</strong> {{ parcel.to_branch_address or 'N/A' }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Parcel Physical Specs & Pricing -->
+      <div class="card bg-dark border-0 p-4 mb-4" style="background: rgba(30, 41, 59, 0.7); border-radius: 14px; border: 1px solid rgba(255,255,255,0.08) !important;">
+        <h5 class="font-weight-bold text-info mb-3"><i class="fas fa-boxes mr-2"></i> Freight Specifications</h5>
+        <div class="row text-center">
+          <div class="col-sm-3 col-6 mb-3">
+            <span class="text-muted small text-uppercase d-block">Weight</span>
+            <div class="h4 font-weight-bold text-white mt-1">{{ parcel.weight }} kg</div>
+          </div>
+          <div class="col-sm-3 col-6 mb-3">
+            <span class="text-muted small text-uppercase d-block">Dimensions</span>
+            <div class="h4 font-weight-bold text-white mt-1">{{ parcel.length or '10' }}x{{ parcel.width or '10' }}x{{ parcel.height or '10' }} cm</div>
+          </div>
+          <div class="col-sm-3 col-6 mb-3">
+            <span class="text-muted small text-uppercase d-block">Freight Cost</span>
+            <div class="h4 font-weight-bold text-success mt-1">${{ "{:,.2f}".format(parcel.price | float) if parcel and parcel.price else '0.00' }}</div>
+          </div>
+          <div class="col-sm-3 col-6 mb-3">
+            <span class="text-muted small text-uppercase d-block">Payment Status</span>
+            <div class="mt-1">
+              <span class="badge badge-lg {% if parcel.payment_status == 'Paid' %}badge-success{% else %}badge-warning{% endif %} px-3 py-1">
+                {{ parcel.payment_status or 'Unpaid' }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Tracking Milestones -->
+      <div class="card bg-dark border-0 p-4" style="background: rgba(30, 41, 59, 0.7); border-radius: 14px; border: 1px solid rgba(255,255,255,0.08) !important;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="font-weight-bold text-white m-0"><i class="fas fa-route text-success mr-2"></i> Tracking Journey History</h5>
+          <a href="/track?ref_no={{ parcel.reference_number }}" target="_blank" class="small text-info">View Public Tracking</a>
+        </div>
+        <div id="tracking_timeline_container">
+          <p class="text-muted small">Tracking checkpoints are updated in real-time as the package moves through branches and delivery agents.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Official QR Code & Barcode Card -->
+    <div class="col-lg-4 mb-4">
+      <!-- Prominent QR Code Card (Requirement 2 & 3) -->
+      <div class="card border-0 mb-4" style="background: rgba(15, 23, 42, 0.95); border: 2px solid rgba(56, 189, 248, 0.4) !important; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+        <div class="card-header py-3 px-4 d-flex justify-content-between align-items-center" style="background: rgba(56, 189, 248, 0.15); border-bottom: 1px solid rgba(56, 189, 248, 0.3);">
+          <h5 class="font-weight-bold text-info m-0"><i class="fas fa-qrcode mr-2"></i> Official Parcel QR Code</h5>
+          <span class="badge badge-info font-weight-bold">Live Scannable</span>
+        </div>
+        <div class="card-body p-4 text-center">
+          <!-- The QR Code Image (Requirement 3) -->
+          <div class="p-3 d-inline-block rounded mb-3" style="background: #ffffff; box-shadow: 0 6px 20px rgba(0,0,0,0.5);">
+            <img src="/api/parcel/{{ parcel.reference_number }}/qrcode" alt="QR Code for #{{ parcel.reference_number }}" style="width: 200px; height: 200px; display: block;" class="img-fluid" id="pageQrImg">
+          </div>
+          
+          <div class="mb-3">
+            <span class="text-info font-weight-bold h5 d-block mb-1" style="letter-spacing: 1px;">#{{ parcel.reference_number }}</span>
+            <small class="text-muted d-block">Scan with any smartphone camera to open live tracking</small>
+          </div>
+
+          <!-- Code128 Barcode -->
+          <div class="p-2 rounded mb-3" style="background: #ffffff; display: inline-block; max-width: 100%;">
+            <img src="/api/parcel/{{ parcel.reference_number }}/barcode" alt="Barcode for #{{ parcel.reference_number }}" style="height: 48px; max-width: 100%; display: block;">
+          </div>
+
+          <!-- Action Buttons (Requirement 4 & 5) -->
+          <div class="d-grid gap-2">
+            <a href="/api/parcel/{{ parcel.reference_number }}/qrcode" download="QR_{{ parcel.reference_number }}.png" class="btn btn-info btn-block py-2 font-weight-bold mb-2">
+              <i class="fas fa-download mr-2"></i> Download QR Code (PNG)
+            </a>
+            <button type="button" class="btn btn-outline-light btn-block py-2 font-weight-bold mb-2" onclick="printPageQrCode('{{ parcel.reference_number }}', '{{ (parcel.recipient_name or '') | escape }}', '{{ (parcel.recipient_address or '') | escape }}')">
+              <i class="fas fa-print mr-2"></i> Print Shipping QR Label
+            </button>
+            <a href="/api/parcel/{{ parcel.reference_number }}/barcode" download="Barcode_{{ parcel.reference_number }}.png" class="btn btn-outline-secondary text-light btn-block py-2 font-weight-bold">
+              <i class="fas fa-barcode mr-2"></i> Download Barcode
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Delivery Management Card -->
+      <div class="card bg-dark border-0 p-4" style="background: rgba(30, 41, 59, 0.7); border-radius: 14px; border: 1px solid rgba(255,255,255,0.08) !important;">
+        <h6 class="font-weight-bold text-white mb-3"><i class="fas fa-tasks mr-2 text-warning"></i> Delivery Actions</h6>
+        
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <span class="text-muted small">Current Status:</span>
+          <div>
+            {% set st = parcel.status if parcel else 0 %}
+            {% if st == 7 %}
+              <span class="badge badge-success font-weight-bold">Delivered</span>
+            {% elif st == 5 %}
+              <span class="badge badge-warning font-weight-bold">Out for Delivery</span>
+            {% elif st == 9 %}
+              <span class="badge badge-danger font-weight-bold">Failed Attempt</span>
+            {% else %}
+              <span class="badge badge-info font-weight-bold">{{ status_list[st] if status_list and st < (status_list | length) else 'In Transit' }}</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <button type="button" class="btn btn-primary btn-block font-weight-bold mb-2" onclick="uni_modal('Update Status: {{ parcel.reference_number }}', '/modal/manage_parcel_status?id={{ parcel.id }}&cs={{ parcel.status }}')">
+          <i class="fas fa-edit mr-1"></i> Update Parcel Status
+        </button>
+
+        {% if parcel and parcel.invoice %}
+        <a href="/invoice/{{ parcel.invoice.invoice_number }}" target="_blank" class="btn btn-outline-info btn-block font-weight-bold">
+          <i class="fas fa-file-invoice mr-1"></i> View Tax Invoice
+        </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function printPageQrCode(ref, recipient, address) {
+    const qrUrl = '/api/parcel/' + ref + '/qrcode';
+    const bcUrl = '/api/parcel/' + ref + '/barcode';
+    const printWin = window.open('', '', 'width=650,height=550');
+    printWin.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Parcel QR Shipping Label #${ref}</title>
+        <style>
+          body { font-family: 'Segoe UI', Arial, sans-serif; padding: 25px; color: #0f172a; text-align: center; }
+          .label-box { border: 2px dashed #0284c7; border-radius: 12px; padding: 20px; max-width: 420px; margin: 0 auto; }
+          .qr-img { width: 200px; height: 200px; margin: 10px 0; }
+          .ref-num { font-size: 24px; font-weight: 800; color: #0284c7; letter-spacing: 1px; }
+          .barcode-img { height: 48px; max-width: 260px; margin: 10px 0; }
+          .info-text { font-size: 14px; color: #475569; margin: 4px 0; }
+        </style>
+      </head>
+      <body onload="window.print(); setTimeout(function(){ window.close(); }, 750);">
+        <div class="label-box">
+          <div style="font-size: 12px; text-transform: uppercase; color: #64748b; font-weight: bold;">Courier Shipment QR Label</div>
+          <div class="ref-num">#${ref}</div>
+          <div><img src="${qrUrl}" class="qr-img" alt="QR Code"></div>
+          <div><img src="${bcUrl}" class="barcode-img" alt="Barcode"></div>
+          <div class="info-text"><strong>Recipient:</strong> ${recipient || 'Valued Customer'}</div>
+          <div class="info-text"><strong>Destination:</strong> ${address || 'Local Destination'}</div>
+          <div style="font-size: 11px; color: #94a3b8; margin-top: 10px;">Scan QR code with smartphone to track delivery</div>
+        </div>
+      </body>
+      </html>
+    `);
+    printWin.document.close();
+  }
+
+  $(document).ready(function() {
+    // Load tracking history
+    $.ajax({
+      url: '/api/parcel/history',
+      method: 'GET',
+      data: { ref_no: '{{ parcel.reference_number }}' },
+      success: function(resp) {
+        if(typeof resp === 'string') {
+          try { resp = JSON.parse(resp); } catch(e) {}
+        }
+        let items = (resp && resp.history) ? resp.history : resp;
+        if(Array.isArray(items) && items.length > 0) {
+          let html = '<ul class="list-unstyled mb-0">';
+          items.forEach(function(item) {
+            html += `
+              <li class="py-2 border-bottom d-flex justify-content-between align-items-center" style="border-color: rgba(255,255,255,0.06) !important;">
+                <div>
+                  <strong class="text-white">${item.status}</strong>
+                  ${item.notes ? '<div class="small text-muted">' + item.notes + '</div>' : ''}
+                </div>
+                <span class="small text-info"><i class="far fa-clock mr-1"></i>${item.date_created}</span>
+              </li>
+            `;
+          });
+          html += '</ul>';
+          $('#tracking_timeline_container').html(html);
+        }
+      }
+    });
+  });
+</script>

@@ -1,0 +1,72 @@
+{% extends 'customer/base.html' %}
+{% block title %}My Invoices{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+  <div>
+    <h2 class="font-weight-bold text-white m-0">Invoices & Receipts 💳</h2>
+    <p class="text-muted m-0 mt-1">Official billing statements and payment records for your courier shipments.</p>
+  </div>
+</div>
+
+<div class="glass-card p-4">
+  {% if invoices %}
+  <div class="table-responsive">
+    <table class="table table-dark-custom mb-0 align-middle">
+      <thead>
+        <tr>
+          <th>Invoice #</th>
+          <th>Parcel Ref</th>
+          <th>Date</th>
+          <th>Recipient</th>
+          <th>Total</th>
+          <th>Payment Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for inv in invoices %}
+        <tr>
+          <td>
+            <span class="font-weight-bold text-info">{{ inv.invoice_number }}</span>
+          </td>
+          <td>
+            <a href="/track?ref_no={{ inv.reference_number }}" class="text-white">#{{ inv.reference_number }}</a>
+          </td>
+          <td>
+            <span class="text-muted small">{{ inv.date_created }}</span>
+          </td>
+          <td>
+            <div class="font-weight-medium text-white">{{ inv.recipient_name }}</div>
+          </td>
+          <td>
+            <div class="font-weight-bold text-white">${{ "%.2f"|format(inv.total_amount|float) }}</div>
+            <div class="small text-muted">Tax: ${{ "%.2f"|format(inv.tax_amount|float) }}</div>
+          </td>
+          <td>
+            {% if inv.payment_status == 'Paid' %}
+              <span class="badge-status badge-delivered"><i class="fas fa-check-circle mr-1"></i> Paid</span>
+            {% else %}
+              <span class="badge-status badge-pending"><i class="fas fa-hourglass-half mr-1"></i> Unpaid</span>
+            {% endif %}
+          </td>
+          <td>
+            <a href="/invoice/{{ inv.invoice_number }}" class="btn btn-sm btn-outline-info" target="_blank" title="View Full Printable Invoice">
+              <i class="fas fa-print mr-1"></i> View Receipt
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="text-center py-5 text-muted">
+    <i class="fas fa-file-invoice-dollar fa-3x mb-3" style="opacity: 0.3;"></i>
+    <p class="h5 text-white">No invoices yet</p>
+    <p class="small text-muted">Invoices are automatically generated when you book a parcel shipment.</p>
+    <a href="{{ url_for('customer.book_parcel') }}" class="btn btn-sm btn-gradient-primary mt-2">Book a Shipment</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

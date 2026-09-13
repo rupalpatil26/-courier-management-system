@@ -1,0 +1,71 @@
+<div class="container-fluid p-2">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h5 class="font-weight-bold text-white m-0">{{ invoice.invoice_number }}</h5>
+      <span class="small text-muted">Created on {{ invoice.date_created }}</span>
+    </div>
+    <div>
+      {% if invoice.payment_status == 'Paid' %}
+        <span class="badge badge-success px-3 py-1 font-weight-bold">PAID</span>
+      {% else %}
+        <span class="badge badge-warning px-3 py-1 font-weight-bold">UNPAID</span>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="row mb-3 p-3 rounded" style="background: rgba(15,23,42,0.6);">
+    <div class="col-6">
+      <div class="small text-muted">Sender:</div>
+      <div class="font-weight-bold text-white">{{ parcel.sender_name }}</div>
+      <div class="small text-muted">{{ parcel.sender_contact }}</div>
+    </div>
+    <div class="col-6">
+      <div class="small text-muted">Recipient:</div>
+      <div class="font-weight-bold text-white">{{ parcel.recipient_name }}</div>
+      <div class="small text-muted">{{ parcel.recipient_contact }}</div>
+    </div>
+  </div>
+
+  <table class="table table-sm text-white mb-3">
+    <tr>
+      <td class="text-muted border-0">Tracking Reference:</td>
+      <td class="text-right font-weight-bold border-0 text-info">#{{ parcel.reference_number }}</td>
+    </tr>
+    <tr>
+      <td class="text-muted">Weight / Specs:</td>
+      <td class="text-right">{{ parcel.weight }} kg ({{ parcel.length or '10' }}x{{ parcel.width or '10' }}x{{ parcel.height or '10' }} cm)</td>
+    </tr>
+    <tr>
+      <td class="text-muted">Payment Method:</td>
+      <td class="text-right">{{ invoice.payment_method }}</td>
+    </tr>
+    <tr>
+      <td class="text-muted">Freight Subtotal:</td>
+      <td class="text-right">${{ "%.2f"|format(invoice.subtotal|float) }}</td>
+    </tr>
+    <tr>
+      <td class="text-muted">Logistics Tax (5%):</td>
+      <td class="text-right">${{ "%.2f"|format(invoice.tax_amount|float) }}</td>
+    </tr>
+    <tr class="border-top font-weight-bold" style="font-size: 1.1rem;">
+      <td class="text-white">Total Amount:</td>
+      <td class="text-right text-success">${{ "%.2f"|format(invoice.total_amount|float) }}</td>
+    </tr>
+  </table>
+
+  <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top" style="border-color: rgba(255,255,255,0.08) !important;">
+    <div class="d-flex align-items-center gap-2">
+      {% if qr_code %}
+      <img src="{{ qr_code }}" alt="QR" style="width: 50px; height: 50px; background: white; padding: 2px; border-radius: 4px;">
+      {% endif %}
+      {% if barcode %}
+      <img src="{{ barcode }}" alt="Barcode" style="height: 38px; max-width: 130px; background: white; padding: 2px; border-radius: 4px;" class="ml-2">
+      {% endif %}
+    </div>
+    <div>
+      <a href="/invoice/{{ invoice.invoice_number }}" target="_blank" class="btn btn-primary btn-sm">
+        <i class="fas fa-print mr-1"></i> Full Printable Receipt
+      </a>
+    </div>
+  </div>
+</div>

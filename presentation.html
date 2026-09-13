@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Courier Management System - Project Presentation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #007bff;
+            --secondary: #6c757d;
+            --dark: #0a0a0b;
+            --light: #f8f9fa;
+            --accent: #00d2ff;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--dark);
+            color: var(--light);
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, #1a2a44 0%, #0d0d0d 100%);
+        }
+
+        .slide-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 1500px;
+        }
+
+        .slide {
+            width: 85%;
+            max-width: 1100px;
+            height: 650px;
+            background: var(--glass);
+            backdrop-filter: blur(30px);
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            padding: 60px;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.7);
+            animation: slideFade 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        @keyframes slideFade {
+            from { opacity: 0; transform: scale(0.95) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        h1 {
+            font-size: 4.5rem;
+            font-weight: 800;
+            margin-bottom: 25px;
+            letter-spacing: -2px;
+            background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h2 {
+            font-size: 2.8rem;
+            margin-bottom: 35px;
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        p {
+            font-size: 1.3rem;
+            line-height: 1.7;
+            margin-bottom: 20px;
+            color: #aaa;
+            max-width: 800px;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        li {
+            font-size: 1.3rem;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            color: #ddd;
+        }
+
+        li::before {
+            content: '→';
+            color: var(--accent);
+            margin-right: 20px;
+            font-weight: 800;
+            font-size: 1.5rem;
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            display: flex;
+            gap: 20px;
+            z-index: 100;
+        }
+
+        button {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            color: white;
+            padding: 14px 28px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+        }
+
+        button:hover {
+            background: var(--accent);
+            color: var(--dark);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(0, 210, 255, 0.3);
+        }
+
+        .slide-counter {
+            position: fixed;
+            bottom: 50px;
+            left: 50px;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #666;
+            letter-spacing: 1px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 16px;
+            background: rgba(0, 210, 255, 0.1);
+            color: var(--accent);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border: 1px solid rgba(0, 210, 255, 0.2);
+        }
+
+        .tech-stack {
+            display: flex;
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .tech-item {
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            font-size: 1rem;
+            font-weight: 500;
+            color: #eee;
+        }
+
+        /* Animation for the background gradient */
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 0.8; }
+            100% { opacity: 0.5; }
+        }
+
+        .glow {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: var(--accent);
+            filter: blur(150px);
+            opacity: 0.1;
+            border-radius: 50%;
+            z-index: -1;
+            animation: pulse 4s infinite ease-in-out;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="bg-canvas"></div>
+    <div class="glow" style="top: 10%; left: 10%;"></div>
+    <div class="glow" style="bottom: 10%; right: 10%; animation-delay: 2s;"></div>
+
+    <div class="slide-container">
+        <!-- Slide 1: Title -->
+        <div class="slide active" id="slide-1">
+            <div class="badge">PROPOSAL & ARCHITECTURE</div>
+            <h1>Courier Management System</h1>
+            <p>A sophisticated end-to-end logistics platform designed for reliability, speed, and real-time operational transparency.</p>
+            <div class="tech-stack">
+                <div class="tech-item">PHP 7.4+</div>
+                <div class="tech-item">MySQLi</div>
+                <div class="tech-item">Bootstrap 4</div>
+                <div class="tech-item">jQuery / Ajax</div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Problem Statement -->
+        <div class="slide" id="slide-2">
+            <h2>The Logistics Challenge</h2>
+            <ul>
+                <li>Operational inefficiencies due to manual parcel logging.</li>
+                <li>Visibility gap between branch dispatch and customer receipt.</li>
+                <li>Fragmentation in staff communication across multiple hubs.</li>
+                <li>Complexities in generating accurate cross-branch reports.</li>
+            </ul>
+        </div>
+
+        <!-- Slide 3: Solution Strategy -->
+        <div class="slide" id="slide-3">
+            <h2>The Solution Engine</h2>
+            <ul>
+                <li>Centrally managed cloud-ready architecture (PHP/MySQL).</li>
+                <li>Unique 12-digit automated reference number generation.</li>
+                <li>Multi-stage tracking: from 'Accepted' to 'Out for Delivery'.</li>
+                <li>Granular role-based access for Admins and Branch Staff.</li>
+            </ul>
+        </div>
+
+        <!-- Slide 4: Strategic Features -->
+        <div class="slide" id="slide-4">
+            <h2>Key Capabilities</h2>
+            <ul>
+                <li><strong>Live Tracking:</strong> Real-time status sync via asynchronous AJAX calls.</li>
+                <li><strong>Hub Management:</strong> Dynamic branch creation and staff allocation.</li>
+                <li><strong>Bulk Registration:</strong> streamlined multi-parcel entry for enterprise clients.</li>
+                <li><strong>Analytical Reports:</strong> Date-bound exports for status and revenue oversight.</li>
+            </ul>
+        </div>
+
+        <!-- Slide 5: System Design -->
+        <div class="slide" id="slide-5">
+            <h2>Architecture & Stack</h2>
+            <div style="display: flex; gap: 50px; margin-top: 30px;">
+                <div style="flex: 1;">
+                    <h3 style="color: var(--accent); margin-bottom: 20px; font-size: 1.8rem;">Frontend Excellence</h3>
+                    <p>Responsive design using Bootstrap 4, enriched with custom transitions and reactive UI components.</p>
+                </div>
+                <div style="flex: 1;">
+                    <h3 style="color: var(--accent); margin-bottom: 20px; font-size: 1.8rem;">Backend Reliability</h3>
+                    <p>Optimized PHP logic with secure session handling and efficient MySQL query execution patterns.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Database Integrity -->
+        <div class="slide" id="slide-6">
+            <h2>Data Foundation</h2>
+            <p>The system utilizes a relational schema optimized for tracking speed.</p>
+            <ul>
+                <li><strong>Auth & Users:</strong> encrypted credentials and staff-branch mapping.</li>
+                <li><strong>Parcel Core:</strong> dimensional data, sender/recipient metadata, and pricing.</li>
+                <li><strong>Movement Audit:</strong> immutable history logs for every parcel transition.</li>
+                <li><strong>Configuration:</strong> global system variables and branding assets.</li>
+            </ul>
+        </div>
+
+        <!-- Slide 7: Roadmap -->
+        <div class="slide" id="slide-7">
+            <h2>Conclusion & Future</h2>
+            <p>Our platform provides the necessary digital backbone for modern courier and logistics enterprises.</p>
+            <ul>
+                <li>Next: Automated SMS/Email API integrations for customers.</li>
+                <li>Next: GPS-based live location tracking for field agents.</li>
+                <li>Next: Integrated multi-currency payment gateway solutions.</li>
+            </ul>
+            <h2 style="margin-top: 50px; font-size: 2.2rem; background: linear-gradient(135deg, var(--accent), #fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Questions & Feedback</h2>
+        </div>
+    </div>
+
+    <div class="slide-counter">PAGE <span id="current">01</span> / 07</div>
+
+    <div class="controls">
+        <button onclick="prevSlide()">BACK</button>
+        <button onclick="nextSlide()">NEXT</button>
+    </div>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 7;
+
+        function updateSlide() {
+            document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+            document.getElementById(`slide-${currentSlide}`).classList.add('active');
+            document.getElementById('current').innerText = currentSlide.toString().padStart(2, '0');
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides) {
+                currentSlide++;
+                updateSlide();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 1) {
+                currentSlide--;
+                updateSlide();
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+        });
+
+        // Click on background to go next
+        document.body.addEventListener('click', (e) => {
+            if(e.target === document.body || e.target === document.documentElement || e.target.id === 'bg-canvas' || e.target.className === 'slide-container') {
+                nextSlide();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1165 @@
+<!-- Parcel Tracking Page - Dark Modern Neon Glassmorphism Theme -->
+<div class="col-lg-12 tracking-page-wrapper">
+
+  <!-- Hero Search Card -->
+  <div class="tracking-search-card mb-4">
+    <div class="tracking-search-body">
+      <div class="tracking-header text-center mb-3">
+        <div class="tracking-badge-pill mb-2">
+          <i class="fas fa-satellite-dish mr-1 text-cyan"></i> LIVE LOGISTICS MONITOR
+        </div>
+        <h2 class="tracking-title">Track Your Parcel</h2>
+        <p class="tracking-subtitle">
+          Enter your shipment reference number to follow the journey, view status history, and monitor delivery in real time.
+        </p>
+      </div>
+
+      <div class="d-flex w-100 justify-content-center align-items-center">
+        <div class="tracking-input-wrapper col-12 col-md-9 col-lg-7 p-0">
+          <div class="input-group tracking-input-group">
+            <div class="input-group-prepend">
+              <span class="input-group-text tracking-input-icon">
+                <i class="fas fa-barcode"></i>
+              </span>
+            </div>
+            <input type="search" id="ref_no" class="form-control tracking-input" placeholder="Type or paste tracking number (e.g. 201406231415)" autocomplete="off">
+            <div class="input-group-append">
+              <button type="button" id="track-btn" class="btn tracking-btn">
+                <i class="fas fa-search-location mr-2"></i> Track Now
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick Test Badges -->
+          <div class="quick-samples mt-2 text-center">
+            <span class="sample-label mr-2"><i class="fas fa-bolt text-warning mr-1"></i> Quick Test:</span>
+            <button type="button" class="sample-badge" data-ref="201406231415">
+              <i class="fas fa-check-circle text-success mr-1"></i> 201406231415 <span class="badge-sub">(Delivered - 7 Milestones)</span>
+            </button>
+            <button type="button" class="sample-badge" data-ref="333930610513">
+              <i class="fas fa-box text-info mr-1"></i> 333930610513 <span class="badge-sub">(Accepted)</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Tracking Results & Route Visualizer -->
+  <div class="row tracking-content-row">
+    <!-- Left Column: Vertical Timeline -->
+    <div class="col-lg-7 col-xl-8 mb-4">
+      <!-- Parcel Overview Header Bar (Appears when tracking active) -->
+      <div id="tracking_meta_card" class="tracking-meta-card d-none mb-3">
+        <div class="d-flex flex-wrap align-items-center justify-content-between">
+          <div class="d-flex align-items-center mb-2 mb-md-0">
+            <div class="meta-icon-box mr-3">
+              <i class="fas fa-shipping-fast text-cyan"></i>
+            </div>
+            <div>
+              <span class="meta-label">WAYBILL REFERENCE</span>
+              <h5 class="meta-ref mb-0 text-white font-weight-bold" id="meta_ref_text">#--</h5>
+            </div>
+          </div>
+          <div class="d-flex align-items-center">
+            <div class="text-right mr-3">
+              <span class="meta-label">CURRENT STATUS</span>
+              <div id="meta_status_pill" class="meta-status-pill">In Transit</div>
+            </div>
+            <div class="meta-badge-count">
+              <span id="meta_count">0</span> Milestones
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State Card (Before Searching) -->
+      <div id="tracking_empty_state" class="tracking-empty-card text-center p-5">
+        <div class="empty-icon-wrap mb-3">
+          <i class="fas fa-radar"></i>
+        </div>
+        <h4 class="text-white font-weight-bold mb-2">Awaiting Tracking Reference</h4>
+        <p class="text-muted mb-4 max-w-450 mx-auto">
+          Enter a valid consignment reference number above or click one of the quick test badges to view detailed transit milestones.
+        </p>
+        <div class="d-inline-flex align-items-center empty-hint-pill">
+          <i class="fas fa-shield-alt text-primary mr-2"></i> End-to-End Real-Time GPS & Dispatch Synchronization
+        </div>
+      </div>
+
+      <!-- Vertical Timeline Container -->
+      <div class="tracking-timeline-container d-none" id="tracking_timeline_wrap">
+        <div class="modern-timeline" id="parcel_history"></div>
+      </div>
+    </div>
+
+    <!-- Right Column: Route Visualizer & Carrier Intelligence -->
+    <div class="col-lg-5 col-xl-4">
+      <div class="route-visualizer-card sticky-top">
+        <div class="card-header-gradient d-flex align-items-center justify-content-between">
+          <span class="font-weight-bold text-white"><i class="fas fa-route mr-2 text-cyan"></i> Transit Route Visualizer</span>
+          <span class="badge badge-route-live"><span class="pulse-dot"></span> LIVE</span>
+        </div>
+
+        <div class="route-body">
+          <!-- Animated Interactive Route Illustration -->
+          <div class="route-graphic-stage">
+            <div class="route-line-bg"></div>
+            <div class="route-line-active" id="route_line_progress"></div>
+
+            <!-- Route Stop 1: Origin Hub -->
+            <div class="route-stop stop-1 active">
+              <div class="stop-node">
+                <i class="fas fa-warehouse"></i>
+              </div>
+              <div class="stop-info">
+                <span class="stop-title">Origin Branch</span>
+                <span class="stop-desc">Package Intake</span>
+              </div>
+            </div>
+
+            <!-- Route Stop 2: Linehaul Transit -->
+            <div class="route-stop stop-2" id="route_stop_2">
+              <div class="stop-node">
+                <i class="fas fa-truck-moving"></i>
+              </div>
+              <div class="stop-info">
+                <span class="stop-title">Linehaul Transit</span>
+                <span class="stop-desc">Regional Transit</span>
+              </div>
+            </div>
+
+            <!-- Route Stop 3: Destination Hub -->
+            <div class="route-stop stop-3" id="route_stop_3">
+              <div class="stop-node">
+                <i class="fas fa-building"></i>
+              </div>
+              <div class="stop-info">
+                <span class="stop-title">Local Facility</span>
+                <span class="stop-desc">Sorting & Assignment</span>
+              </div>
+            </div>
+
+            <!-- Route Stop 4: Doorstep Delivery -->
+            <div class="route-stop stop-4" id="route_stop_4">
+              <div class="stop-node">
+                <i class="fas fa-map-marker-alt"></i>
+              </div>
+              <div class="stop-info">
+                <span class="stop-title">Recipient Address</span>
+                <span class="stop-desc">Final Doorstep</span>
+              </div>
+            </div>
+
+            <!-- Moving Truck / Courier Graphic -->
+            <div class="moving-courier-truck" id="moving_truck">
+              <div class="truck-box">
+                <i class="fas fa-shipping-fast"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Logistics Details -->
+          <div class="logistics-info-box mt-4">
+            <div class="info-row">
+              <span class="info-label"><i class="fas fa-truck text-muted mr-2"></i> Carrier</span>
+              <span class="info-val text-white">CMS Express Logistics</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label"><i class="fas fa-lock text-muted mr-2"></i> Security</span>
+              <span class="info-val text-cyan">Barcode Encrypted</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label"><i class="fas fa-headset text-muted mr-2"></i> Support</span>
+              <span class="info-val text-white">24/7 Dispatch Control</span>
+            </div>
+          </div>
+
+          <!-- Courier Mini Graphic Card -->
+          <div class="courier-mini-badge mt-3">
+            <div class="d-flex align-items-center">
+              <div class="mini-icon-avatar mr-3">
+                <i class="fas fa-box-open text-primary"></i>
+              </div>
+              <div>
+                <div class="font-weight-bold text-white text-sm">Real-Time Verification</div>
+                <div class="text-xs text-muted">All milestones are digitally timestamped upon physical barcode scan.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden Clone Template to preserve legacy JS compatibility -->
+<div id="clone_timeline-item" class="d-none">
+  <div class="iitem">
+    <i class="fas fa-box bg-blue"></i>
+    <div class="timeline-item">
+      <span class="time"><i class="fas fa-clock"></i> <span class="dtime">12:05</span></span>
+      <div class="timeline-body"></div>
+    </div>
+  </div>
+</div>
+
+<style>
+/* ==========================================================================
+   Parcel Tracking - Dark Modern Glassmorphism & Neon Theme
+   ========================================================================== */
+
+.tracking-page-wrapper {
+  padding-bottom: 2rem;
+}
+
+/* 1. Hero Search Card */
+.tracking-search-card {
+  background: rgba(17, 24, 39, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.6), 0 0 25px rgba(59, 130, 246, 0.12);
+  padding: 2.25rem 1.5rem;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.tracking-search-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.tracking-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 0.35rem 0.9rem;
+  border-radius: 9999px;
+  background: rgba(0, 240, 255, 0.1);
+  color: #00f0ff;
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.15);
+}
+
+.tracking-title {
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 2.2rem;
+  letter-spacing: -0.025em;
+  margin-bottom: 0.4rem;
+  background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.tracking-subtitle {
+  color: #94a3b8;
+  font-size: 1rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.tracking-input-group {
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(99, 102, 241, 0.35);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.tracking-input-group:focus-within {
+  border-color: #00f0ff;
+  box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.2), 0 0 25px rgba(59, 130, 246, 0.3);
+}
+
+.tracking-input-icon {
+  background: transparent !important;
+  border: none !important;
+  color: #64748b !important;
+  padding-left: 1.25rem;
+  font-size: 1.1rem;
+}
+
+.tracking-input {
+  background: transparent !important;
+  border: none !important;
+  color: #ffffff !important;
+  font-size: 1.05rem;
+  font-weight: 600;
+  padding: 0.85rem 1rem;
+}
+
+.tracking-input::placeholder {
+  color: #64748b;
+  font-weight: 400;
+}
+
+.tracking-input:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.tracking-btn {
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%) !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  font-size: 1rem !important;
+  border: none !important;
+  padding: 0.85rem 1.75rem !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+}
+
+.tracking-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6), 0 0 15px rgba(139, 92, 246, 0.4);
+}
+
+/* Quick test badges */
+.sample-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sample-badge {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e2e8f0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.3rem 0.75rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  margin: 0 0.25rem 0.35rem 0;
+  transition: all 0.2s ease;
+}
+
+.sample-badge:hover {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.5);
+  color: #00f0ff;
+  transform: translateY(-1px);
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.25);
+}
+
+.badge-sub {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+/* 2. Parcel Meta Overview Bar */
+.tracking-meta-card {
+  background: rgba(17, 24, 39, 0.75);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 1rem 1.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.meta-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(0, 240, 255, 0.12);
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+}
+
+.meta-label {
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #64748b;
+  letter-spacing: 0.08em;
+  display: block;
+}
+
+.meta-ref {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+  letter-spacing: 0.04em;
+}
+
+.meta-status-pill {
+  display: inline-block;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 0.25rem 0.85rem;
+  border-radius: 9999px;
+  background: rgba(16, 185, 129, 0.18);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.meta-badge-count {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 0.35rem 0.8rem;
+  border-radius: 8px;
+}
+
+/* 3. Empty State Card */
+.tracking-empty-card {
+  background: rgba(17, 24, 39, 0.55);
+  backdrop-filter: blur(12px);
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+}
+
+.empty-icon-wrap {
+  width: 76px;
+  height: 76px;
+  margin: 0 auto;
+  border-radius: 50%;
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  color: #38bdf8;
+  box-shadow: 0 0 25px rgba(59, 130, 246, 0.2);
+  animation: radarPulse 3s infinite ease-in-out;
+}
+
+@keyframes radarPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+  }
+  50% {
+    transform: scale(1.06);
+    box-shadow: 0 0 35px rgba(0, 240, 255, 0.4);
+  }
+}
+
+.empty-hint-pill {
+  font-size: 0.82rem;
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0.5rem 1.25rem;
+  border-radius: 9999px;
+}
+
+/* 4. Modern Animated Vertical Timeline */
+.modern-timeline {
+  position: relative;
+  padding: 1rem 0 1.5rem 3.25rem;
+}
+
+.modern-timeline::before {
+  content: '';
+  position: absolute;
+  top: 1.5rem;
+  bottom: 1.5rem;
+  left: 1.45rem;
+  width: 3px;
+  background: linear-gradient(180deg, #00f0ff 0%, #3b82f6 35%, #8b5cf6 75%, rgba(139, 92, 246, 0.2) 100%);
+  border-radius: 9999px;
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+}
+
+/* Timeline Item Entry */
+.modern-tl-item {
+  position: relative;
+  margin-bottom: 1.6rem;
+  opacity: 0;
+  transform: translateY(15px);
+  animation: tlItemFadeIn 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes tlItemFadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Timeline Node */
+.modern-tl-node {
+  position: absolute;
+  left: -3.25rem;
+  top: 0.75rem;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  color: #ffffff;
+  background: #111827;
+  border: 2px solid var(--node-color, #3b82f6);
+  box-shadow: 0 0 15px var(--node-glow, rgba(59, 130, 246, 0.4));
+  z-index: 2;
+  transition: all 0.3s ease;
+}
+
+/* Pulsing ring for latest active milestone */
+.modern-tl-item.is-current .modern-tl-node {
+  border-width: 3px;
+  animation: pulseNodeRing 2s infinite;
+}
+
+@keyframes pulseNodeRing {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 240, 255, 0.7), 0 0 20px rgba(0, 240, 255, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 12px rgba(0, 240, 255, 0), 0 0 25px rgba(0, 240, 255, 0.6);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 240, 255, 0), 0 0 20px rgba(0, 240, 255, 0.4);
+  }
+}
+
+/* Timeline Card */
+.modern-tl-card {
+  background: rgba(17, 24, 39, 0.75);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 1.25rem 1.4rem;
+  box-shadow: 0 8px 25px -4px rgba(0, 0, 0, 0.5);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.modern-tl-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--node-gradient, linear-gradient(180deg, #3b82f6, #8b5cf6));
+  opacity: 0.8;
+}
+
+.modern-tl-item:hover .modern-tl-card {
+  transform: translateY(-3px) scale(1.008);
+  border-color: rgba(99, 102, 241, 0.4);
+  box-shadow: 0 14px 30px -4px rgba(0, 0, 0, 0.6), 0 0 20px rgba(59, 130, 246, 0.2);
+}
+
+.modern-tl-item.is-current .modern-tl-card {
+  background: linear-gradient(135deg, rgba(24, 34, 53, 0.85) 0%, rgba(15, 23, 42, 0.9) 100%);
+  border-color: rgba(0, 240, 255, 0.45);
+  box-shadow: 0 10px 30px -4px rgba(0, 0, 0, 0.6), 0 0 25px rgba(0, 240, 255, 0.2);
+}
+
+.tl-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+.tl-status-title {
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 1.15rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
+.tl-time-badge {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.25rem 0.65rem;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.tl-status-desc {
+  color: #94a3b8;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-bottom: 0.6rem;
+}
+
+.tl-status-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.78rem;
+}
+
+.tl-badge-completed {
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 0.18rem 0.55rem;
+  border-radius: 9999px;
+  font-weight: 700;
+}
+
+.tl-badge-active {
+  color: #00f0ff;
+  background: rgba(0, 240, 255, 0.12);
+  border: 1px solid rgba(0, 240, 255, 0.4);
+  padding: 0.2rem 0.65rem;
+  border-radius: 9999px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+}
+
+.pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #00f0ff;
+  display: inline-block;
+  margin-right: 6px;
+  box-shadow: 0 0 8px #00f0ff;
+  animation: pulseDotAnim 1.4s infinite;
+}
+
+@keyframes pulseDotAnim {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.4); opacity: 0.5; }
+}
+
+/* 5. Right Column: Route Visualizer Card */
+.route-visualizer-card {
+  background: rgba(17, 24, 39, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  border-radius: 18px;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  top: 85px;
+}
+
+.card-header-gradient {
+  background: rgba(15, 23, 42, 0.85);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 1rem 1.25rem;
+  font-size: 0.95rem;
+}
+
+.badge-route-live {
+  background: rgba(0, 240, 255, 0.15);
+  color: #00f0ff;
+  border: 1px solid rgba(0, 240, 255, 0.35);
+  padding: 0.25rem 0.6rem;
+  border-radius: 9999px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  font-size: 0.72rem;
+}
+
+.route-body {
+  padding: 1.5rem 1.25rem;
+}
+
+/* Route Graphic Stage */
+.route-graphic-stage {
+  position: relative;
+  padding: 1rem 0 1rem 2rem;
+}
+
+.route-line-bg {
+  position: absolute;
+  top: 1.5rem;
+  bottom: 1.5rem;
+  left: 2.85rem;
+  width: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 9999px;
+}
+
+.route-line-active {
+  position: absolute;
+  top: 1.5rem;
+  height: 0%;
+  left: 2.85rem;
+  width: 4px;
+  background: linear-gradient(180deg, #00f0ff, #3b82f6, #10b981);
+  border-radius: 9999px;
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.5);
+  transition: height 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.route-stop {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 2rem;
+  z-index: 2;
+}
+
+.route-stop:last-child {
+  margin-bottom: 0;
+}
+
+.stop-node {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #111827;
+  border: 2px solid #475569;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  margin-right: 1.2rem;
+  transition: all 0.3s ease;
+}
+
+.route-stop.active .stop-node {
+  border-color: #00f0ff;
+  color: #ffffff;
+  background: #0284c7;
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
+}
+
+.route-stop.completed .stop-node {
+  border-color: #10b981;
+  color: #ffffff;
+  background: #059669;
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+}
+
+.stop-title {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.stop-desc {
+  display: block;
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+
+.moving-courier-truck {
+  position: absolute;
+  left: 2.3rem;
+  top: 1.5rem;
+  transform: translateY(0);
+  transition: top 1s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 3;
+}
+
+.truck-box {
+  width: 22px;
+  height: 22px;
+  background: #f59e0b;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  color: #111827;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.7);
+  animation: truckBounce 1.5s infinite ease-in-out;
+}
+
+@keyframes truckBounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+
+/* Logistics info box */
+.logistics-info-box {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.35rem 0;
+  font-size: 0.82rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  color: #94a3b8;
+}
+
+.info-val {
+  font-weight: 700;
+}
+
+.courier-mini-badge {
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+}
+
+.mini-icon-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(59, 130, 246, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .tracking-title {
+    font-size: 1.75rem;
+  }
+  .modern-timeline {
+    padding-left: 2.75rem;
+  }
+  .modern-tl-node {
+    width: 36px;
+    height: 36px;
+    font-size: 0.95rem;
+    left: -2.75rem;
+  }
+  .modern-timeline::before {
+    left: 1.15rem;
+  }
+  .tracking-btn {
+    padding: 0.75rem 1.25rem !important;
+    font-size: 0.9rem !important;
+  }
+}
+</style>
+
+<script>
+$(document).ready(function(){
+  // Configuration dictionary mapping each status to its visual design
+  var STATUS_CONFIG = {
+    "Item Accepted by Courier": {
+      icon: "fas fa-box-open",
+      color: "#38bdf8",
+      glow: "rgba(56, 189, 248, 0.45)",
+      gradient: "linear-gradient(180deg, #0284c7, #38bdf8)",
+      badgeBg: "rgba(56, 189, 248, 0.15)",
+      desc: "Parcel documentation verified and consignment formally accepted into Courier Management System dispatch hub.",
+      progress: "20%"
+    },
+    "Collected": {
+      icon: "fas fa-dolly-flatbed",
+      color: "#818cf8",
+      glow: "rgba(129, 140, 248, 0.45)",
+      gradient: "linear-gradient(180deg, #4f46e5, #818cf8)",
+      badgeBg: "rgba(129, 140, 248, 0.15)",
+      desc: "Consignment safely collected from origin branch and staged for regional vehicle transfer.",
+      progress: "35%"
+    },
+    "Shipped": {
+      icon: "fas fa-shipping-fast",
+      color: "#a855f7",
+      glow: "rgba(168, 85, 247, 0.45)",
+      gradient: "linear-gradient(180deg, #7c3aed, #a855f7)",
+      badgeBg: "rgba(168, 85, 247, 0.15)",
+      desc: "Dispatched from primary sorting terminal via regional transport linehaul carrier route.",
+      progress: "50%"
+    },
+    "In-Transit": {
+      icon: "fas fa-truck-moving",
+      color: "#00f0ff",
+      glow: "rgba(0, 240, 255, 0.5)",
+      gradient: "linear-gradient(180deg, #0099ff, #00f0ff)",
+      badgeBg: "rgba(0, 240, 255, 0.15)",
+      desc: "Shipment in linehaul transit moving smoothly towards the destination regional distribution hub.",
+      progress: "65%"
+    },
+    "Arrived At Destination": {
+      icon: "fas fa-map-marked-alt",
+      color: "#3b82f6",
+      glow: "rgba(59, 130, 246, 0.45)",
+      gradient: "linear-gradient(180deg, #1d4ed8, #3b82f6)",
+      badgeBg: "rgba(59, 130, 246, 0.15)",
+      desc: "Consignment safely checked in at local destination distribution facility and staged for final delivery run.",
+      progress: "80%"
+    },
+    "Out for Delivery": {
+      icon: "fas fa-motorcycle",
+      color: "#f59e0b",
+      glow: "rgba(245, 158, 11, 0.5)",
+      gradient: "linear-gradient(180deg, #d97706, #f59e0b)",
+      badgeBg: "rgba(245, 158, 11, 0.15)",
+      desc: "Courier driver assigned with consignment and actively out on final delivery run to recipient address.",
+      progress: "90%"
+    },
+    "Ready to Pickup": {
+      icon: "fas fa-warehouse",
+      color: "#06b6d4",
+      glow: "rgba(6, 182, 212, 0.45)",
+      gradient: "linear-gradient(180deg, #0891b2, #06b6d4)",
+      badgeBg: "rgba(6, 182, 212, 0.15)",
+      desc: "Package ready for recipient collection at destination branch counter with valid identification.",
+      progress: "90%"
+    },
+    "Delivered": {
+      icon: "fas fa-check-circle",
+      color: "#10b981",
+      glow: "rgba(16, 185, 129, 0.55)",
+      gradient: "linear-gradient(180deg, #059669, #10b981)",
+      badgeBg: "rgba(16, 185, 129, 0.15)",
+      desc: "Consignment successfully delivered to recipient doorstep and verified with electronic signature sign-off.",
+      progress: "100%"
+    },
+    "Picked-up": {
+      icon: "fas fa-handshake",
+      color: "#10b981",
+      glow: "rgba(16, 185, 129, 0.55)",
+      gradient: "linear-gradient(180deg, #059669, #10b981)",
+      badgeBg: "rgba(16, 185, 129, 0.15)",
+      desc: "Package directly claimed, verified, and signed off by recipient at destination branch.",
+      progress: "100%"
+    },
+    "Unsuccessful Delivery Attempt": {
+      icon: "fas fa-exclamation-triangle",
+      color: "#f43f5e",
+      glow: "rgba(244, 63, 94, 0.5)",
+      gradient: "linear-gradient(180deg, #e11d48, #f43f5e)",
+      badgeBg: "rgba(244, 63, 94, 0.15)",
+      desc: "Delivery attempt unsuccessful due to recipient absence or access restriction. Rescheduling automatic next attempt.",
+      progress: "85%"
+    },
+    "Unsuccessfull Delivery Attempt": {
+      icon: "fas fa-exclamation-triangle",
+      color: "#f43f5e",
+      glow: "rgba(244, 63, 94, 0.5)",
+      gradient: "linear-gradient(180deg, #e11d48, #f43f5e)",
+      badgeBg: "rgba(244, 63, 94, 0.15)",
+      desc: "Delivery attempt unsuccessful due to recipient absence or access restriction. Rescheduling automatic next attempt.",
+      progress: "85%"
+    }
+  };
+
+  function updateRouteVisualizer(latestStatus){
+    var cfg = STATUS_CONFIG[latestStatus] || {progress: "25%"};
+    var progressVal = cfg.progress || "25%";
+    $('#route_line_progress').css('height', progressVal);
+
+    // Update stop states
+    var pInt = parseInt(progressVal);
+    $('#route_stop_2').toggleClass('active', pInt >= 50).toggleClass('completed', pInt > 50);
+    $('#route_stop_3').toggleClass('active', pInt >= 80).toggleClass('completed', pInt > 80);
+    $('#route_stop_4').toggleClass('active', pInt >= 100).toggleClass('completed', pInt >= 100);
+
+    // Position the moving truck
+    var truckTop = (1.5 + (pInt / 100) * 12) + "rem";
+    $('#moving_truck').css('top', truckTop);
+  }
+
+  function track_now(){
+    if(typeof start_load === 'function') start_load();
+    var tracking_num = $.trim($('#ref_no').val());
+
+    if(!tracking_num){
+      $('#tracking_empty_state').removeClass('d-none');
+      $('#tracking_timeline_wrap').addClass('d-none');
+      $('#tracking_meta_card').addClass('d-none');
+      $('#parcel_history').html('');
+      $('#route_line_progress').css('height', '0%');
+      if(typeof end_load === 'function') end_load();
+      return;
+    }
+
+    $.ajax({
+      url: '/api/parcel/history',
+      method: 'GET',
+      data: {ref_no: tracking_num},
+      error: function(xhr, status, err){
+        console.error(err);
+        var errMsg = "An error occurred during tracking request.";
+        if (xhr.status === 404 || (xhr.responseJSON && xhr.responseJSON.status === 'error')) {
+          errMsg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : ('Unknown tracking number: ' + tracking_num);
+        }
+        if(typeof alert_toast === 'function'){
+          alert_toast(errMsg, 'error');
+        } else {
+          alert(errMsg);
+        }
+        $('#tracking_empty_state').removeClass('d-none');
+        $('#tracking_timeline_wrap').addClass('d-none');
+        $('#tracking_meta_card').addClass('d-none');
+        $('#parcel_history').html('');
+        if(typeof end_load === 'function') end_load();
+      },
+      success: function(resp){
+        var data = resp;
+        if(typeof resp === 'string'){
+          try {
+            data = JSON.parse(resp);
+          } catch(e){
+            data = resp;
+          }
+        }
+
+        if(data == 2 || data === "2" || (data && data.status === 'error')){
+          var unknownMsg = (data && data.message) ? data.message : ('Unknown tracking number: ' + tracking_num);
+          if(typeof alert_toast === 'function'){
+            alert_toast(unknownMsg, 'error');
+          } else {
+            alert(unknownMsg);
+          }
+          $('#tracking_empty_state').removeClass('d-none');
+          $('#tracking_timeline_wrap').addClass('d-none');
+          $('#tracking_meta_card').addClass('d-none');
+          $('#parcel_history').html('');
+          if(typeof end_load === 'function') end_load();
+          return;
+        }
+
+        var historyItems = (data && data.history) ? data.history : data;
+        if(Array.isArray(historyItems) && historyItems.length > 0){
+          var totalItems = historyItems.length;
+          var latestItem = historyItems[totalItems - 1];
+          var latestStatus = latestItem.status;
+
+          // Update Meta Overview Card
+          $('#meta_ref_text').text('#' + tracking_num);
+          $('#meta_count').text(totalItems);
+          var latestCfg = STATUS_CONFIG[latestStatus] || {color: '#38bdf8', glow: 'rgba(56, 189, 248, 0.4)'};
+          $('#meta_status_pill').text(latestStatus)
+            .css({
+              'color': latestCfg.color,
+              'border-color': latestCfg.color,
+              'background': latestCfg.glow.replace('0.4', '0.12').replace('0.5', '0.15')
+            });
+          $('#tracking_meta_card').removeClass('d-none');
+          $('#tracking_empty_state').addClass('d-none');
+          $('#tracking_timeline_wrap').removeClass('d-none');
+
+          // Build modern animated timeline cards
+          var html = '';
+          historyItems.forEach(function(item, idx){
+            var isCurrent = (idx === totalItems - 1);
+            var cfg = STATUS_CONFIG[item.status] || {
+              icon: "fas fa-box",
+              color: "#38bdf8",
+              glow: "rgba(56, 189, 248, 0.4)",
+              gradient: "linear-gradient(180deg, #0284c7, #38bdf8)",
+              desc: "Consignment milestone logged and synchronized with central dispatch registry."
+            };
+
+            var delay = (idx * 0.08) + 's';
+
+            html += '<div class="modern-tl-item ' + (isCurrent ? 'is-current' : '') + '" style="animation-delay: ' + delay + '; --node-color: ' + cfg.color + '; --node-glow: ' + cfg.glow + '; --node-gradient: ' + cfg.gradient + ';">';
+            
+            // Node Icon
+            html += '  <div class="modern-tl-node">';
+            html += '    <i class="' + cfg.icon + '"></i>';
+            html += '  </div>';
+
+            // Glassmorphism Card
+            html += '  <div class="modern-tl-card">';
+            html += '    <div class="tl-card-header">';
+            html += '      <h5 class="tl-status-title">';
+            html += '        <i class="' + cfg.icon + ' mr-2" style="color: ' + cfg.color + '"></i> ' + item.status;
+            html += '      </h5>';
+            html += '      <span class="tl-time-badge">';
+            html += '        <i class="far fa-clock mr-1 text-primary"></i> ' + item.date_created;
+            html += '      </span>';
+            html += '    </div>';
+            
+            html += '    <p class="tl-status-desc">' + cfg.desc + '</p>';
+            
+            html += '    <div class="tl-status-meta">';
+            if(isCurrent){
+              html += '      <span class="tl-badge-active"><span class="pulse-dot"></span> CURRENT STATUS</span>';
+              html += '      <span class="text-xs text-muted"><i class="fas fa-satellite text-cyan mr-1"></i> Active Stage</span>';
+            } else {
+              html += '      <span class="tl-badge-completed"><i class="fas fa-check mr-1"></i> COMPLETED</span>';
+              html += '      <span class="text-xs text-muted">Milestone #' + (idx + 1) + '</span>';
+            }
+            html += '    </div>';
+            html += '  </div>';
+
+            html += '</div>';
+          });
+
+          $('#parcel_history').html(html);
+
+          // Update right-hand route visualizer
+          updateRouteVisualizer(latestStatus);
+        } else {
+          $('#tracking_empty_state').removeClass('d-none');
+          $('#tracking_timeline_wrap').addClass('d-none');
+          $('#tracking_meta_card').addClass('d-none');
+          $('#parcel_history').html('');
+        }
+      },
+      complete: function(){
+        if(typeof end_load === 'function') end_load();
+      }
+    });
+  }
+
+  // Event handlers
+  $('#track-btn').click(function(e){
+    e.preventDefault();
+    track_now();
+  });
+
+  $('#ref_no').on('keypress', function(e){
+    if(e.which === 13){
+      e.preventDefault();
+      track_now();
+    }
+  });
+
+  $('#ref_no').on('search', function(){
+    track_now();
+  });
+
+  // Quick test badge click
+  $(document).on('click', '.sample-badge', function(e){
+    e.preventDefault();
+    var ref = $(this).data('ref');
+    $('#ref_no').val(ref);
+    track_now();
+  });
+
+  // Check URL param for auto-tracking
+  var urlParams = new URLSearchParams(window.location.search);
+  var autoRef = urlParams.get('ref_no') || urlParams.get('ref');
+  if(autoRef){
+    $('#ref_no').val(autoRef);
+    track_now();
+  }
+});
+</script>

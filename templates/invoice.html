@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Invoice {{ invoice.invoice_number }} - {{ system.name | default('Courier Management System') }}</title>
+  {% include 'partials/header.html' %}
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background-color: #0b1120;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: #0f172a;
+      padding: 30px 15px;
+    }
+    .invoice-wrapper {
+      max-width: 800px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      padding: 40px;
+    }
+    .invoice-header {
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 24px;
+      margin-bottom: 28px;
+    }
+    .invoice-title {
+      font-size: 28px;
+      font-weight: 800;
+      color: #0284c7;
+      letter-spacing: -0.5px;
+    }
+    .status-stamp {
+      display: inline-block;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .status-paid { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+    .status-unpaid { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+    .table-invoice th {
+      background: #f8fafc;
+      color: #475569;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      border-top: none;
+      padding: 12px 14px;
+    }
+    .table-invoice td {
+      padding: 14px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    @media print {
+      body { background: white !important; padding: 0 !important; }
+      .invoice-wrapper { box-shadow: none !important; border: none !important; padding: 0 !important; max-width: 100% !important; }
+      .no-print { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="invoice-wrapper">
+  <!-- Print Controls Bar -->
+  <div class="d-flex justify-content-between align-items-center mb-4 no-print">
+    <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm">
+      <i class="fas fa-arrow-left mr-1"></i> Back
+    </a>
+    <div class="d-flex gap-2">
+      <a href="/api/parcel/{{ parcel.reference_number }}/qrcode" download="QR_{{ parcel.reference_number }}.png" class="btn btn-outline-info btn-sm font-weight-bold mr-2">
+        <i class="fas fa-download mr-1"></i> Download QR
+      </a>
+      <button type="button" class="btn btn-primary font-weight-bold btn-sm" onclick="window.print()">
+        <i class="fas fa-print mr-1"></i> Print / Save as PDF
+      </button>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <div class="invoice-header d-flex justify-content-between align-items-start flex-wrap gap-3">
+    <div>
+      <div class="invoice-title">{{ system.name | default('Courier Management System') }}</div>
+      <div class="text-muted small mt-1">Official Freight Receipt & Tax Invoice</div>
+      <div class="text-muted small mt-2">
+        <strong>Address:</strong> {{ system.address | default('Corporate Logistics HQ') }}<br>
+        <strong>Email:</strong> {{ system.email | default('support@courier.local') }} | <strong>Phone:</strong> {{ system.contact | default('+1 800-COURIER') }}
+      </div>
+    </div>
+    <div class="text-right">
+      <h4 class="font-weight-bold m-0 text-dark">{{ invoice.invoice_number }}</h4>
+      <div class="text-muted small mt-1">Date: {{ invoice.date_created }}</div>
+      <div class="mt-2">
+        {% if invoice.payment_status == 'Paid' %}
+          <span class="status-stamp status-paid"><i class="fas fa-check-circle mr-1"></i> Paid</span>
+        {% else %}
+          <span class="status-stamp status-unpaid"><i class="fas fa-clock mr-1"></i> Payment Pending</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Parties & Routing Row -->
+  <div class="row mb-4">
+    <div class="col-6">
+      <h6 class="font-weight-bold text-muted text-uppercase small mb-2">Sender Information</h6>
+      <div class="font-weight-bold text-dark">{{ parcel.sender_name }}</div>
+      <div class="text-muted small">{{ parcel.sender_contact }}</div>
+      {% if parcel.sender_email %}<div class="text-muted small">{{ parcel.sender_email }}</div>{% endif %}
+      <div class="text-muted small mt-1">{{ parcel.sender_address }}</div>
+      <div class="small text-primary mt-2"><strong>Origin Branch:</strong> {{ parcel.from_branch_code }} ({{ parcel.from_city }})</div>
+    </div>
+    <div class="col-6">
+      <h6 class="font-weight-bold text-muted text-uppercase small mb-2">Recipient Information</h6>
+      <div class="font-weight-bold text-dark">{{ parcel.recipient_name }}</div>
+      <div class="text-muted small">{{ parcel.recipient_contact }}</div>
+      {% if parcel.recipient_email %}<div class="text-muted small">{{ parcel.recipient_email }}</div>{% endif %}
+      <div class="text-muted small mt-1">{{ parcel.recipient_address }}</div>
+      <div class="small text-primary mt-2"><strong>Destination Branch:</strong> {{ parcel.to_branch_code }} ({{ parcel.to_city }})</div>
+    </div>
+  </div>
+
+  <!-- Line Items Table -->
+  <table class="table table-invoice mb-4">
+    <thead>
+      <tr>
+        <th>Description</th>
+        <th>Dimensions / Specs</th>
+        <th>Weight</th>
+        <th class="text-right">Subtotal</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <div class="font-weight-bold text-dark">Standard Courier Freight Shipment</div>
+          <div class="small text-muted">Tracking Ref: #{{ parcel.reference_number }}</div>
+          <div class="small text-muted">Payment: {{ invoice.payment_method }}</div>
+        </td>
+        <td>
+          {{ parcel.length or '10' }} x {{ parcel.width or '10' }} x {{ parcel.height or '10' }} cm
+        </td>
+        <td>{{ parcel.weight }} kg</td>
+        <td class="text-right font-weight-bold text-dark">${{ "%.2f"|format(invoice.subtotal|float) }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Totals Breakdown -->
+  <div class="row mb-4">
+    <div class="col-7">
+      <div class="p-3 bg-light rounded d-flex align-items-center gap-3">
+        <a href="/api/parcel/{{ parcel.reference_number }}/qrcode" target="_blank" title="View full QR code">
+          <img src="/api/parcel/{{ parcel.reference_number }}/qrcode" alt="QR Code #{{ parcel.reference_number }}" style="width: 80px; height: 80px; border-radius: 6px; border: 1px solid #ced4da; background: #fff; padding: 4px; display: block;">
+        </a>
+        <div class="small ml-3">
+          <div class="font-weight-bold text-dark"><i class="fas fa-qrcode mr-1 text-primary"></i> Parcel Tracking QR Code</div>
+          <div class="text-muted">Scan with any smartphone camera to view live status timeline and delivery checkpoints.</div>
+          <div class="mt-1 font-mono text-muted" style="font-size: 0.8rem;">Ref: <strong>#{{ parcel.reference_number }}</strong></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-5">
+      <table class="table table-sm border-0 mb-0">
+        <tr>
+          <td class="border-0 text-muted">Freight Subtotal:</td>
+          <td class="border-0 text-right font-weight-bold text-dark">${{ "%.2f"|format(invoice.subtotal|float) }}</td>
+        </tr>
+        <tr>
+          <td class="border-0 text-muted">Logistics Tax (5%):</td>
+          <td class="border-0 text-right font-weight-bold text-dark">${{ "%.2f"|format(invoice.tax_amount|float) }}</td>
+        </tr>
+        {% if invoice.discount_amount and invoice.discount_amount > 0 %}
+        <tr>
+          <td class="border-0 text-muted">Discount Applied:</td>
+          <td class="border-0 text-right text-success font-weight-bold">-${{ "%.2f"|format(invoice.discount_amount|float) }}</td>
+        </tr>
+        {% endif %}
+        <tr class="border-top" style="font-size: 1.15rem;">
+          <td class="font-weight-bold text-dark pt-2">Total Amount:</td>
+          <td class="font-weight-bold text-right text-primary pt-2">${{ "%.2f"|format(invoice.total_amount|float) }}</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- Barcode Footer -->
+  <div class="text-center pt-3 border-top">
+    {% if barcode %}
+    <img src="{{ barcode }}" alt="Barcode" style="height: 50px; max-width: 260px;" class="mb-2">
+    {% endif %}
+    <div class="text-muted small">Reference: {{ parcel.reference_number }} | Thank you for shipping with {{ system.name | default('Courier Management System') }}!</div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,180 @@
+{% extends 'customer/base.html' %}
+{% block title %}My Parcels{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+  <div>
+    <h2 class="font-weight-bold text-white m-0">My Parcels 📦</h2>
+    <p class="text-muted m-0 mt-1">Full history of your dispatched and incoming shipments.</p>
+  </div>
+  <a href="{{ url_for('customer.book_parcel') }}" class="btn btn-gradient-primary">
+    <i class="fas fa-plus-circle mr-1"></i> Book New Parcel
+  </a>
+</div>
+
+<!-- Status Filters -->
+<div class="d-flex gap-2 mb-4 overflow-auto pb-2" style="white-space: nowrap;">
+  <a href="{{ url_for('customer.parcels', status='all') }}" class="btn btn-sm {% if current_status == 'all' %}btn-info{% else %}btn-outline-secondary text-light{% endif %}" style="border-radius: 20px; padding: 6px 16px;">All</a>
+  <a href="{{ url_for('customer.parcels', status='0') }}" class="btn btn-sm {% if current_status == '0' %}btn-info{% else %}btn-outline-secondary text-light{% endif %}" style="border-radius: 20px; padding: 6px 16px;">Accepted</a>
+  <a href="{{ url_for('customer.parcels', status='3') }}" class="btn btn-sm {% if current_status == '3' %}btn-info{% else %}btn-outline-secondary text-light{% endif %}" style="border-radius: 20px; padding: 6px 16px;">In-Transit</a>
+  <a href="{{ url_for('customer.parcels', status='5') }}" class="btn btn-sm {% if current_status == '5' %}btn-info{% else %}btn-outline-secondary text-light{% endif %}" style="border-radius: 20px; padding: 6px 16px;">Out for Delivery</a>
+  <a href="{{ url_for('customer.parcels', status='7') }}" class="btn btn-sm {% if current_status == '7' %}btn-info{% else %}btn-outline-secondary text-light{% endif %}" style="border-radius: 20px; padding: 6px 16px;">Delivered</a>
+</div>
+
+<div class="glass-card p-4">
+  {% if parcels %}
+  <div class="table-responsive">
+    <table class="table table-dark-custom mb-0 align-middle">
+      <thead>
+        <tr>
+          <th>QR / Barcode</th>
+          <th>Tracking #</th>
+          <th>Recipient</th>
+          <th>Destination</th>
+          <th>Cost</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in parcels %}
+        <tr>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              {% if p.qr_code %}
+              <img src="{{ p.qr_code }}" alt="QR Code" style="width: 44px; height: 44px; border-radius: 6px; background: white; padding: 2px; cursor: pointer;" title="Click to view QR Code" onclick="showCodeModal('{{ p.reference_number }}', '{{ p.qr_code }}', '{{ p.barcode }}')">
+              {% endif %}
+            </div>
+          </td>
+          <td>
+            <span class="font-weight-bold text-info" style="font-size: 0.95rem; letter-spacing: 0.5px;">{{ p.reference_number }}</span>
+            <div class="small text-muted">{{ p.date_created }}</div>
+          </td>
+          <td>
+            <div class="font-weight-semibold text-white">{{ p.recipient_name }}</div>
+            <div class="small text-muted">{{ p.recipient_contact }}</div>
+          </td>
+          <td>
+            <div class="text-truncate" style="max-width: 180px;" title="{{ p.recipient_address }}">
+              {{ p.recipient_address }}
+            </div>
+          </td>
+          <td>
+            <span class="font-weight-bold text-white">${{ "%.2f"|format(p.price|float) }}</span>
+            <div class="small text-muted">{{ p.payment_method }}</div>
+          </td>
+          <td>
+            {% if p.status == 7 %}
+              <span class="badge-status badge-delivered"><i class="fas fa-check-circle mr-1"></i> Delivered</span>
+            {% elif p.status == 5 %}
+              <span class="badge-status badge-transit"><i class="fas fa-truck mr-1"></i> Out for Delivery</span>
+            {% elif p.status == 9 %}
+              <span class="badge-status badge-failed"><i class="fas fa-times-circle mr-1"></i> Attempt Failed</span>
+            {% else %}
+              <span class="badge-status badge-pending"><i class="fas fa-clock mr-1"></i> {{ p.status_text }}</span>
+            {% endif %}
+          </td>
+          <td>
+            <div class="d-flex gap-1">
+              <a href="/track?ref_no={{ p.reference_number }}" class="btn btn-sm btn-outline-info" title="Live Track Timeline">
+                <i class="fas fa-search-location"></i>
+              </a>
+              <a href="/invoice/{{ p.id }}?parcel_id={{ p.id }}" class="btn btn-sm btn-outline-light" title="Print Invoice / Receipt">
+                <i class="fas fa-file-invoice"></i>
+              </a>
+              <button type="button" class="btn btn-sm btn-outline-secondary text-info" title="View Details" onclick="customer_modal('Parcel #{{ p.reference_number }} Details', '/modal/view_parcel?id={{ p.id }}', 'modal-lg')">
+                <i class="fas fa-eye"></i>
+              </button>
+              {% if p.status == 7 %}
+              <button type="button" class="btn btn-sm btn-outline-warning" title="Rate Delivery Experience" onclick="customer_modal('Rate Delivery Experience', '/modal/feedback?id={{ p.id }}')">
+                <i class="fas fa-star"></i>
+              </button>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="text-center py-5 text-muted">
+    <i class="fas fa-box-open fa-3x mb-3" style="opacity: 0.3;"></i>
+    <p class="h5 text-white">No parcels found</p>
+    <p class="small text-muted">You have no parcels matching this filter criteria.</p>
+    <a href="{{ url_for('customer.book_parcel') }}" class="btn btn-sm btn-gradient-primary mt-2">Book a Shipment Now</a>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Code Modal -->
+<div class="modal fade" id="codeModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-sm" role="document">
+    <div class="modal-content text-center p-3" style="background: #1e293b; color: white; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+      <div class="modal-header border-0 pb-0">
+        <h6 class="modal-title font-weight-bold" id="codeModalTitle">Parcel Codes</h6>
+        <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="p-3 bg-white rounded mb-3">
+          <img id="modalQrImg" src="" alt="QR Code" class="img-fluid" style="max-height: 180px;">
+        </div>
+        <div class="p-2 bg-white rounded">
+          <img id="modalBarcodeImg" src="" alt="Barcode" class="img-fluid" style="max-height: 70px;">
+        </div>
+      </div>
+      </div>
+      <div class="modal-footer border-0 pt-0 justify-content-center flex-wrap gap-2">
+        <a id="downloadQrBtn" href="" download="" class="btn btn-sm btn-info"><i class="fas fa-download mr-1"></i> Download QR</a>
+        <button type="button" class="btn btn-sm btn-outline-light" onclick="printModalQr()"><i class="fas fa-print mr-1"></i> Print QR</button>
+        <a id="downloadBcBtn" href="" download="" class="btn btn-sm btn-secondary"><i class="fas fa-barcode mr-1"></i> Barcode</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentModalRef = '';
+  function showCodeModal(ref, qr, barcode) {
+    currentModalRef = ref;
+    $('#codeModalTitle').text('#' + ref);
+    $('#modalQrImg').attr('src', qr || ('/api/parcel/' + encodeURIComponent(ref) + '/qrcode'));
+    $('#modalBarcodeImg').attr('src', barcode || ('/api/parcel/' + encodeURIComponent(ref) + '/barcode'));
+    $('#downloadQrBtn').attr('href', '/api/parcel/' + encodeURIComponent(ref) + '/qrcode').attr('download', 'QR_' + ref + '.png');
+    $('#downloadBcBtn').attr('href', '/api/parcel/' + encodeURIComponent(ref) + '/barcode').attr('download', 'Barcode_' + ref + '.png');
+    $('#codeModal').modal('show');
+  }
+
+  function printModalQr() {
+    if (!currentModalRef) return;
+    const qrSrc = '/api/parcel/' + encodeURIComponent(currentModalRef) + '/qrcode';
+    const bcSrc = '/api/parcel/' + encodeURIComponent(currentModalRef) + '/barcode';
+    const pw = window.open('', '_blank', 'width=520,height=600');
+    pw.document.write(`
+      <html>
+        <head>
+          <title>Parcel QR Label #${currentModalRef}</title>
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; text-align: center; padding: 24px; }
+            .card { border: 2px dashed #0284c7; padding: 20px; border-radius: 12px; display: inline-block; max-width: 360px; }
+            h3 { margin: 0 0 4px; color: #0f172a; }
+            p { margin: 0 0 16px; font-size: 13px; color: #64748b; }
+            img.qr { width: 180px; height: 180px; margin-bottom: 12px; }
+            img.bc { max-width: 260px; height: 45px; }
+          </style>
+        </head>
+        <body onload="window.print(); window.close();">
+          <div class="card">
+            <h3>Courier Shipment</h3>
+            <p>Tracking #${currentModalRef}</p>
+            <img class="qr" src="${qrSrc}" alt="QR Code"><br>
+            <img class="bc" src="${bcSrc}" alt="Barcode">
+            <p style="margin-top: 10px; font-size: 11px;">Scan with smartphone camera to track package</p>
+          </div>
+        </body>
+      </html>
+    `);
+    pw.document.close();
+  }
+</script>
+{% endblock %}

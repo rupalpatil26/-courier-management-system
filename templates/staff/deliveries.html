@@ -1,0 +1,257 @@
+{% extends 'staff/base.html' %}
+{% block title %}My Deliveries{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+  <div>
+    <h2 class="font-weight-bold text-white m-0">Assigned Deliveries 📋</h2>
+    <p class="text-muted m-0 mt-1">Manage all assigned parcels for your route and verify recipient deliveries.</p>
+  </div>
+  <a href="{{ url_for('staff.scan_page') }}" class="btn btn-gradient-staff">
+    <i class="fas fa-qrcode mr-1"></i> Scan Barcode
+  </a>
+</div>
+
+<!-- Tabs Navigation -->
+<div class="d-flex gap-2 mb-4 overflow-auto pb-2" style="white-space: nowrap;">
+  <a href="{{ url_for('staff.deliveries', tab='all') }}" class="btn btn-sm {% if current_tab == 'all' %}btn-success{% else %}btn-outline-secondary text-light{% endif %}" style="border-radius: 20px; padding: 6px 18px;">All Deliveries</a>
+  <a href="{{ url_for('staff.deliveries', tab='today') }}" class="btn btn-sm {% if current_tab == 'today' %}btn-success{% else %}btn-outline-secondary text-light{% endif %}" style="border-radius: 20px; padding: 6px 18px;">Today's Manifest</a>
+  <a href="{{ url_for('staff.deliveries', tab='pending') }}" class="btn btn-sm {% if current_tab == 'pending' %}btn-success{% else %}btn-outline-secondary text-light{% endif %}" style="border-radius: 20px; padding: 6px 18px;">Pending</a>
+  <a href="{{ url_for('staff.deliveries', tab='completed') }}" class="btn btn-sm {% if current_tab == 'completed' %}btn-success{% else %}btn-outline-secondary text-light{% endif %}" style="border-radius: 20px; padding: 6px 18px;">Completed</a>
+  <a href="{{ url_for('staff.deliveries', tab='failed') }}" class="btn btn-sm {% if current_tab == 'failed' %}btn-success{% else %}btn-outline-secondary text-light{% endif %}" style="border-radius: 20px; padding: 6px 18px;">Failed / Re-attempt</a>
+</div>
+
+<div class="glass-card p-4">
+  {% if deliveries %}
+  <div class="table-responsive">
+    <table class="table table-dark-custom mb-0 align-middle">
+      <thead>
+        <tr>
+          <th>Codes</th>
+          <th>Tracking #</th>
+          <th>Recipient Details</th>
+          <th>Destination</th>
+          <th>Payment</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in deliveries %}
+        <tr>
+          <td>
+            {% if p.barcode %}
+            <img src="{{ p.barcode }}" alt="Barcode" style="height: 38px; max-width: 110px; background: white; padding: 2px; border-radius: 4px;">
+            {% endif %}
+          </td>
+          <td>
+            <span class="font-weight-bold text-info">#{{ p.reference_number }}</span>
+            <div class="small text-muted">{{ p.weight }} kg | ${{ "%.2f"|format(p.price|float) }}</div>
+          </td>
+          <td>
+            <div class="font-weight-bold text-white">{{ p.recipient_name }}</div>
+            <div class="small text-muted"><a href="tel:{{ p.recipient_contact }}" class="text-info"><i class="fas fa-phone-alt mr-1"></i>{{ p.recipient_contact }}</a></div>
+            {% if p.recipient_email %}
+            <div class="small text-muted"><i class="fas fa-envelope mr-1"></i>{{ p.recipient_email }}</div>
+            {% endif %}
+          </td>
+          <td>
+            <div class="text-truncate" style="max-width: 200px;" title="{{ p.recipient_address }}">
+              {{ p.recipient_address }}
+            </div>
+            {% if p.delivery_notes %}
+            <div class="small text-warning mt-1"><i class="fas fa-sticky-note mr-1"></i>{{ p.delivery_notes }}</div>
+            {% endif %}
+          </td>
+          <td>
+            <span class="badge {% if p.payment_status == 'Paid' %}badge-success{% else %}badge-warning{% endif %}">
+              {{ p.payment_status or 'Unpaid' }}
+            </span>
+            <div class="small text-muted mt-1">{{ p.payment_method }}</div>
+          </td>
+          <td>
+            {% if p.status == 7 %}
+              <span class="badge-status badge-delivered"><i class="fas fa-check-circle mr-1"></i> Delivered</span>
+            {% elif p.status == 5 %}
+              <span class="badge-status badge-transit"><i class="fas fa-truck mr-1"></i> Out for Delivery</span>
+            {% elif p.status == 9 %}
+              <span class="badge-status badge-failed"><i class="fas fa-times-circle mr-1"></i> Failed</span>
+            {% else %}
+              <span class="badge-status badge-pending"><i class="fas fa-clock mr-1"></i> {{ p.status_text }}</span>
+            {% endif %}
+          </td>
+          <td>
+            <div class="btn-group btn-group-sm">
+              {% if p.status != 7 %}
+              <button type="button" class="btn btn-success" title="Verify OTP & Deliver" onclick="openStaffOtpModal({{ p.id }}, '{{ p.reference_number }}', '{{ p.recipient_name }}', '{{ p.recipient_email }}')">
+                <i class="fas fa-key mr-1"></i> Deliver
+              </button>
+              {% endif %}
+              <button type="button" class="btn btn-outline-light" title="Update Status / Notes" onclick="openStaffStatusModal({{ p.id }}, '{{ p.reference_number }}', {{ p.status }})">
+                <i class="fas fa-edit"></i>
+              </button>
+              <a href="/track?ref_no={{ p.reference_number }}" class="btn btn-outline-info" title="Tracking Timeline">
+                <i class="fas fa-search-location"></i>
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="text-center py-5 text-muted">
+    <i class="fas fa-truck-loading fa-3x mb-3" style="opacity: 0.3;"></i>
+    <p class="h5 text-white">No deliveries in this view</p>
+    <p class="small text-muted">Select another tab to review other deliveries.</p>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Reusable OTP Modal -->
+<div class="modal fade" id="staffOtpModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-md" role="document">
+    <div class="modal-content" style="background: #1e293b; color: white; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title font-weight-bold text-success"><i class="fas fa-shield-alt mr-2"></i> OTP Delivery Verification</h5>
+        <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body py-4">
+        <div id="otpAlertArea"></div>
+        <p class="text-muted small">Deliver parcel <strong id="otpParcelRef" class="text-info"></strong> to <strong id="otpRecipientName" class="text-white"></strong>.</p>
+        
+        <div class="p-3 rounded mb-3" style="background: rgba(15,23,42,0.6); border: 1px solid rgba(255,255,255,0.06);">
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="small text-muted">Customer Email: <strong id="otpRecipientEmail" class="text-light"></strong></span>
+            <button type="button" id="btnRequestOtp" class="btn btn-sm btn-outline-info" onclick="requestOtpForParcel()">
+              <i class="fas fa-paper-plane mr-1"></i> Send / Resend OTP
+            </button>
+          </div>
+          <div id="otpSendMsg" class="small text-success mt-2" style="display:none;"></div>
+        </div>
+
+        <div class="form-group text-center my-3">
+          <label class="font-weight-bold text-light mb-2">Enter 6-Digit Customer OTP Code</label>
+          <input type="text" id="enteredOtpInput" class="form-control text-center font-weight-bold" maxlength="6" placeholder="• • • • • •" style="font-size: 2rem; letter-spacing: 8px; background: #0f172a; color: #34d399; border: 2px solid #10b981; border-radius: 10px;">
+        </div>
+
+        <div class="form-group mb-0">
+          <label class="text-muted small">Delivery Notes (Optional)</label>
+          <input type="text" id="otpNotesInput" class="form-control" placeholder="e.g. Handed directly to recipient at front door" style="background: rgba(15,23,42,0.6); color: white; border-color: rgba(255,255,255,0.1);">
+        </div>
+      </div>
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-success font-weight-bold" onclick="submitOtpVerification()">
+          <i class="fas fa-check-circle mr-1"></i> Verify OTP & Mark Delivered
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Reusable Status Modal -->
+<div class="modal fade" id="staffStatusModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-md" role="document">
+    <div class="modal-content" style="background: #1e293b; color: white; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+      <form action="{{ url_for('staff.update_delivery_status') }}" method="POST">
+        <input type="hidden" name="parcel_id" id="statusParcelId">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title font-weight-bold text-info"><i class="fas fa-edit mr-2"></i> Update Delivery Status</h5>
+          <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+        </div>
+        <div class="modal-body py-3">
+          <p class="text-muted small">Updating status for parcel <strong id="statusParcelRef" class="text-info"></strong></p>
+
+          <div class="form-group mb-3">
+            <label class="text-muted small font-weight-bold">Select Status</label>
+            <select name="status" id="statusSelect" class="form-control" style="background: #0f172a; color: white; border-color: rgba(255,255,255,0.1);">
+              <option value="5">Out for Delivery (Dispatched)</option>
+              <option value="9">Unsuccessful Delivery Attempt</option>
+              <option value="4">Arrived At Destination Branch</option>
+              <option value="3">In-Transit</option>
+            </select>
+          </div>
+
+          <div class="form-group mb-0">
+            <label class="text-muted small font-weight-bold">Delivery Agent Notes</label>
+            <textarea name="delivery_notes" class="form-control" rows="3" placeholder="e.g. Attempted delivery, recipient not available." style="background: rgba(15,23,42,0.6); color: white; border-color: rgba(255,255,255,0.1);"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer border-0 pt-0">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary font-weight-bold">Update Status</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  let activeParcelId = null;
+
+  function openStaffOtpModal(id, ref, name, email) {
+    activeParcelId = id;
+    $('#otpParcelRef').text('#' + ref);
+    $('#otpRecipientName').text(name);
+    $('#otpRecipientEmail').text(email || 'Not configured');
+    $('#enteredOtpInput').val('');
+    $('#otpNotesInput').val('');
+    $('#otpAlertArea').html('');
+    $('#otpSendMsg').hide();
+    $('#staffOtpModal').modal('show');
+  }
+
+  function requestOtpForParcel() {
+    if (!activeParcelId) return;
+    $('#btnRequestOtp').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Sending...');
+    $.post('{{ url_for("staff.request_otp") }}', { parcel_id: activeParcelId }, function(resp) {
+      $('#btnRequestOtp').prop('disabled', false).html('<i class="fas fa-paper-plane mr-1"></i> Send / Resend OTP');
+      if (resp.success) {
+        $('#otpSendMsg').text(resp.message).show();
+      } else {
+        alert(resp.message);
+      }
+    }).fail(function() {
+      $('#btnRequestOtp').prop('disabled', false).html('<i class="fas fa-paper-plane mr-1"></i> Send / Resend OTP');
+      alert('Failed to send OTP.');
+    });
+  }
+
+  function submitOtpVerification() {
+    let otp = $('#enteredOtpInput').val().trim();
+    let notes = $('#otpNotesInput').val().trim();
+    if (otp.length !== 6) {
+      $('#otpAlertArea').html('<div class="alert alert-danger py-2 mb-3">Please enter a valid 6-digit OTP.</div>');
+      return;
+    }
+
+    start_load();
+    $.post('{{ url_for("staff.verify_otp") }}', {
+      parcel_id: activeParcelId,
+      otp: otp,
+      delivery_notes: notes
+    }, function(resp) {
+      end_load();
+      if (resp.success) {
+        $('#staffOtpModal').modal('hide');
+        alert(resp.message);
+        location.reload();
+      } else {
+        $('#otpAlertArea').html('<div class="alert alert-danger py-2 mb-3">' + resp.message + '</div>');
+      }
+    }).fail(function() {
+      end_load();
+      $('#otpAlertArea').html('<div class="alert alert-danger py-2 mb-3">An error occurred while verifying OTP.</div>');
+    });
+  }
+
+  function openStaffStatusModal(id, ref, currentStatus) {
+    $('#statusParcelId').val(id);
+    $('#statusParcelRef').text('#' + ref);
+    $('#statusSelect').val(currentStatus);
+    $('#staffStatusModal').modal('show');
+  }
+</script>
+{% endblock %}

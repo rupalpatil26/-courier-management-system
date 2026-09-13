@@ -1,0 +1,74 @@
+<div class="container-fluid">
+	<form action="" id="update_status">
+		<input type="hidden" name="id" value="{{ id }}">
+		<div class="form-group mb-3">
+			<label for="" class="text-muted small font-weight-bold">Update Status</label>
+			<select name="status" id="status_selector" class="custom-select custom-select-sm" style="background: #1e293b; color: white;">
+				{% for st in status_list %}
+					<option value="{{ loop.index0 }}" {% if current_status == loop.index0 %}selected{% endif %}>{{ st }}</option>
+				{% endfor %}
+			</select>
+		</div>
+		<div class="form-group mb-2">
+			<label for="" class="text-muted small font-weight-bold">Notes / Reason (Optional)</label>
+			<input type="text" name="delivery_notes" class="form-control form-control-sm" placeholder="e.g. Package dispatched, or customer unavailable" style="background: #1e293b; color: white;">
+		</div>
+	</form>
+</div>
+
+<div class="modal-footer display p-0 m-0">
+  <button class="btn btn-primary btn-sm" form="update_status">Update Status</button>
+  <button type="button" class="btn btn-secondary btn-sm" onclick="uni_modal('Parcel\'s Details','/modal/view_parcel?id={{ id }}','large')">Close</button>
+</div>
+<style>
+	#uni_modal .modal-footer{
+		display: none
+	}
+	#uni_modal .modal-footer.display{
+		display: flex
+	}
+</style>
+<script>
+	$('#update_status').submit(function(e){
+		e.preventDefault();
+		var statusVal = $('#status_selector').val();
+		if(statusVal === '' || statusVal === null || isNaN(statusVal)){
+			alert_toast('Please select a valid status.', 'error');
+			return false;
+		}
+		start_load();
+		$.ajax({
+			url: '/api/parcel/update_status',
+			method: 'POST',
+			data: $(this).serialize(),
+			error: function(err){
+				console.log(err);
+				alert_toast('An error occurred.', "error");
+				end_load();
+			},
+			success: function(resp){
+				var res = resp;
+				if (typeof resp === 'string') {
+					try {
+						res = JSON.parse(resp);
+					} catch(e) {}
+				}
+				if(res == 1 || res === '1' || (typeof res === 'object' && res.status === 'success')){
+					alert_toast("Parcel status successfully updated", 'success');
+					setTimeout(function(){
+						location.reload();
+					}, 750);
+				} else if(res == -1 || res === '-1') {
+					alert_toast('Verification required: OTP must be verified before marking as Delivered.', "warning");
+					end_load();
+				} else if (typeof res === 'object' && res.message) {
+					alert_toast(res.message, "error");
+					end_load();
+				} else {
+					alert_toast('Failed to update status.', "error");
+					end_load();
+				}
+			}
+		});
+	});
+</script>

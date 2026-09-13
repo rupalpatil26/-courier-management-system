@@ -1,0 +1,35 @@
+<div class="container-fluid">
+	<div class="card card-widget widget-user shadow">
+      <div class="widget-user-header bg-dark">
+        <h3 class="widget-user-username">Branch Code: {{ branch.branch_code if branch else '' }}</h3>
+        <h5 class="widget-user-desc">Contact: {{ branch.contact if branch else '' }}</h5>
+      </div>
+      <div class="card-footer">
+        <div class="container-fluid">
+        	<dl>
+        		<dt>Street Address</dt>
+        		<dd>{{ branch.street if branch else '' }}</dd>
+        	</dl>
+        	<dl>
+        		<dt>City / State / Zip</dt>
+        		<dd>{{ branch.city if branch else '' }}, {{ branch.state if branch else '' }} {{ branch.zip_code if branch else '' }}</dd>
+        	</dl>
+        	<dl>
+        		<dt>Country</dt>
+        		<dd>{{ branch.country if branch else '' }}</dd>
+        	</dl>
+        </div>
+    </div>
+	</div>
+</div>
+<div class="modal-footer display p-0 m-0">
+  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+</div>
+<style>
+	#uni_modal .modal-footer{
+		display: none
+	}
+	#uni_modal .modal-footer.display{
+		display: flex
+	}
+</style>

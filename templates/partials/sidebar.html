@@ -1,0 +1,163 @@
+<aside class="main-sidebar sidebar-dark-primary elevation-4">
+  <div class="brand-container text-center py-3 border-bottom" style="border-color: rgba(255,255,255,0.07) !important;">
+    <a href="/dashboard?page=home" class="d-inline-flex align-items-center text-decoration-none">
+      <div class="brand-badge">
+        <i class="fas fa-cubes text-info" style="color: #00f0ff !important;"></i>
+        {% if session.get('login_type') == 1 %}
+        <h3 class="m-0 font-weight-bold">ADMIN</h3>
+        {% else %}
+        <h3 class="m-0 font-weight-bold">STAFF</h3>
+        {% endif %}
+      </div>
+    </a>
+  </div>
+  <div class="sidebar pb-4 mb-4">
+    <nav class="mt-3">
+      <ul class="nav nav-pills nav-sidebar flex-column nav-flat" data-widget="treeview" role="menu" data-accordion="false">
+        <li class="nav-item">
+          <a href="/dashboard?page=home" class="nav-link nav-home">
+            <i class="nav-icon fas fa-tachometer-alt"></i>
+            <p>Dashboard</p>
+          </a>
+        </li>     
+        {% if session.get('login_type') == 1 %}
+        <li class="nav-item">
+          <a href="#" class="nav-link nav-edit_branch">
+            <i class="nav-icon fas fa-building"></i>
+            <p>
+              Branch
+              <i class="right fas fa-angle-left"></i>
+            </p>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item">
+              <a href="/dashboard?page=new_branch" class="nav-link nav-new_branch tree-item">
+                <i class="fas fa-plus-circle nav-icon" style="font-size: 0.8rem;"></i>
+                <p>Add New</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="/dashboard?page=branch_list" class="nav-link nav-branch_list tree-item">
+                <i class="fas fa-list-ul nav-icon" style="font-size: 0.8rem;"></i>
+                <p>List</p>
+              </a>
+            </li>
+          </ul>
+        </li>
+        <li class="nav-item">
+          <a href="#" class="nav-link nav-edit_staff">
+            <i class="nav-icon fas fa-user-friends"></i>
+            <p>
+              Branch Staff
+              <i class="right fas fa-angle-left"></i>
+            </p>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item">
+              <a href="/dashboard?page=new_staff" class="nav-link nav-new_staff tree-item">
+                <i class="fas fa-user-plus nav-icon" style="font-size: 0.8rem;"></i>
+                <p>Add New</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="/dashboard?page=staff_list" class="nav-link nav-staff_list tree-item">
+                <i class="fas fa-users nav-icon" style="font-size: 0.8rem;"></i>
+                <p>List</p>
+              </a>
+            </li>
+          </ul>
+        </li>
+        {% endif %}
+        <li class="nav-item">
+          <a href="#" class="nav-link nav-edit_parcel">
+            <i class="nav-icon fas fa-boxes"></i>
+            <p>
+              Parcels
+              <i class="right fas fa-angle-left"></i>
+            </p>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item">
+              <a href="/dashboard?page=new_parcel" class="nav-link nav-new_parcel tree-item">
+                <i class="fas fa-plus-circle nav-icon" style="font-size: 0.8rem;"></i>
+                <p>Add New</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="/dashboard?page=parcel_list" class="nav-link nav-parcel_list nav-sall tree-item">
+                <i class="fas fa-boxes nav-icon" style="font-size: 0.8rem;"></i>
+                <p>List All</p>
+              </a>
+            </li>
+            {% for st in status_list %}
+            <li class="nav-item">
+              <a href="/dashboard?page=parcel_list&s={{ loop.index0 }}" class="nav-link nav-parcel_list_{{ loop.index0 }} tree-item">
+                <i class="fas fa-circle-notch nav-icon" style="font-size: 0.65rem;"></i>
+                <p>{{ st }}</p>
+              </a>
+            </li>
+            {% endfor %}
+          </ul>
+        </li>
+        <li class="nav-item">
+          <a href="/dashboard?page=track" class="nav-link nav-track">
+            <i class="nav-icon fas fa-search-location"></i>
+            <p>Track Parcel</p>
+          </a>
+        </li>  
+        <li class="nav-item">
+          <a href="/dashboard?page=reports" class="nav-link nav-reports">
+            <i class="nav-icon fas fa-chart-line"></i>
+            <p>Reports</p>
+          </a>
+        </li>
+        {% if session.get('login_type') in (1, 2) %}
+        <li class="nav-item">
+          <a href="{{ url_for('staff.deliveries') }}" class="nav-link">
+            <i class="nav-icon fas fa-truck text-success"></i>
+            <p>Delivery Agent Hub</p>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="{{ url_for('staff.scan_page') }}" class="nav-link">
+            <i class="nav-icon fas fa-qrcode text-info"></i>
+            <p>Scan Barcode / QR</p>
+          </a>
+        </li>
+        {% endif %}
+        {% if session.get('login_type') == 1 %}
+        <li class="nav-item">
+          <a href="/dashboard?page=user_list" class="nav-link nav-user_list">
+            <i class="nav-icon fas fa-users-cog"></i>
+            <p>User List</p>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="/dashboard?page=system_settings" class="nav-link nav-system_settings">
+            <i class="nav-icon fas fa-sliders-h"></i>
+            <p>System Settings</p>
+          </a>
+        </li>
+        {% endif %}
+      </ul>
+    </nav>
+  </div>
+</aside>
+<script>
+  $(document).ready(function(){
+    var page = '{{ page | default("home") }}';
+    var s = '{{ status_filter | default("") }}';
+    if(s !== '')
+      page = page + '_' + s;
+    if($('.nav-link.nav-' + page).length > 0){
+      $('.nav-link.nav-' + page).addClass('active');
+      if($('.nav-link.nav-' + page).hasClass('tree-item') === true){
+        $('.nav-link.nav-' + page).closest('.nav-treeview').siblings('a').addClass('active');
+        $('.nav-link.nav-' + page).closest('.nav-treeview').parent().addClass('menu-open');
+      }
+      if($('.nav-link.nav-' + page).hasClass('nav-is-tree') === true){
+        $('.nav-link.nav-' + page).parent().addClass('menu-open');
+      }
+    }
+  });
+</script>
