@@ -111,6 +111,15 @@ def get_db():
         if db_conn is None:
             # SQLite fallback
             sqlite_path = current_app.config.get('DATABASE', Config.DATABASE)
+            if not os.path.exists(sqlite_path):
+                seed_path = os.path.join(getattr(Config, 'BASE_DIR', os.path.abspath(os.path.dirname(__file__))), 'database', 'cms_db.sqlite')
+                if os.path.exists(seed_path) and seed_path != sqlite_path:
+                    import shutil
+                    try:
+                        os.makedirs(os.path.dirname(sqlite_path), exist_ok=True)
+                        shutil.copy2(seed_path, sqlite_path)
+                    except Exception as copy_err:
+                        logger.warning(f"Could not copy seed SQLite db: {copy_err}")
             os.makedirs(os.path.dirname(sqlite_path), exist_ok=True)
             db_conn = sqlite3.connect(sqlite_path, detect_types=sqlite3.PARSE_DECLTYPES)
             db_conn.row_factory = sqlite3.Row

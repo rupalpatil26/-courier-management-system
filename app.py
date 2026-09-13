@@ -88,7 +88,20 @@ def create_app():
 
     return app
 
+class VercelPathFix:
+    """WSGI middleware to ensure correct PATH_INFO when running under Vercel serverless rewrites."""
+    def __init__(self, wsgi_app):
+        self.wsgi_app = wsgi_app
+
+    def __call__(self, environ, start_response):
+        forwarded_uri = environ.get('HTTP_X_FORWARDED_URI') or environ.get('HTTP_X_MATCHED_PATH')
+        path_info = environ.get('PATH_INFO', '')
+        if forwarded_uri and (path_info.startswith('/api/index') or path_info == '/api'):
+            environ['PATH_INFO'] = forwarded_uri.split('?')[0] or '/'
+        return self.wsgi_app(environ, start_response)
+
 app = create_app()
+app.wsgi_app = VercelPathFix(app.wsgi_app)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8080))
